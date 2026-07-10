@@ -1,0 +1,66 @@
+<main class="relative min-h-screen w-full flex items-center justify-center overflow-hidden px-4 py-12">
+
+  <div
+    class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--color-primary-content)_1px,transparent_0)] bg-size-[24px_24px] opacity-10">
+  </div>
+
+  <div #loginCard class="card relative bg-neutral text-neutral-content shadow-2xl w-full max-w-sm lg:max-w-4xl rounded-4xl lg:rounded-[3rem] overflow-hidden">
+    <div class="lg:grid lg:grid-cols-2 lg:items-center">
+
+      <!-- Formulario -->
+      <div class="card-body lg:py-16 lg:px-14">
+
+        <div class="text-center">
+          <h2 #loginTitle class="mt-4 text-2xl lg:text-3xl font-bold tracking-tight">Iniciar sesión</h2>
+        </div>
+
+        <form class="mt-8">
+
+          <fieldset class="fieldset gap-4">
+
+            <label class="floating-label">
+              <span>Correo electrónico</span>
+              <input type="text" placeholder="usuario@guardian.com"
+                class="input input-ghost rounded-full border border-neutral-content/20 w-full"
+                [class.input-error]="loginForm.email().invalid() && loginForm.email().touched()"
+                [formField]="loginForm.email" />
+            </label>
+
+            @if (loginForm.email().invalid() && loginForm.email().touched()) {
+            <p class="text-error text-xs -mt-2">{{ loginForm.email().errors()[0].message }}</p>
+            }
+
+            <label class="floating-label">
+              <span>Contraseña</span>
+              <input type="password" placeholder="Contraseña"
+                class="input input-ghost rounded-full border border-neutral-content/20 w-full"
+                [class.input-error]="loginForm.password().invalid() && loginForm.password().touched()"
+                [formField]="loginForm.password" />
+            </label>
+
+            @if (loginForm.password().invalid() && loginForm.password().touched()) {
+            <p class="text-error text-xs -mt-2">{{ loginForm.password().errors()[0].message }}</p>
+            }
+
+          </fieldset>
+
+          <div class="mt-2 flex flex-col items-center lg:items-end justify-center">
+
+            <a class="link link-primary text-sm self-end no-underline">Recuperar contraseña</a>
+
+            <button type="button" class="btn btn-primary rounded-full w-full mt-4"
+              [disabled]="loginForm().invalid()">Iniciar sesion</button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Ilustración -->
+      <div #loginImage
+        class="hidden lg:flex items-center justify-center relative m-6 min-h-104 rounded-4xl overflow-hidden bg-linear-to-br from-primary to-secondary">
+        <ng-lottie [options]="lottieOptions" width="100%" height="100%" containerClass="w-full max-w-sm" />
+      </div>
+
+    </div>
+  </div>
+</main>
