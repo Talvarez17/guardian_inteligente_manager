@@ -1,0 +1,17 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body p-5 gap-3">
+    <h2 class="font-bold text-base-content">Planes disponibles</h2>
+    <div class="flex flex-col gap-3">
+      @for (item of plans; track item.name) {
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-semibold text-base-content">{{ item.name }}</p>
+          <p class="text-xs text-base-content/50">{{ item.description }}</p>
+        </div>
+        <span class="text-sm font-bold text-base-content shrink-0">{{ item.price }}</span>
+      </div>
+      }
+    </div>
+    <a class="link link-primary text-sm font-medium no-underline hover:underline mt-1">Ver precios base + IVA →</a>
+  </div>
+</div>

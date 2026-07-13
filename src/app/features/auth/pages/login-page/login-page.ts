@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, ElementRef, signal, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormField, apply, form } from '@angular/forms/signals';
 import { LottieComponent, AnimationOptions } from 'ngx-lottie';
 import gsap from 'gsap';
 import { LoginModel } from '../../../../core/models/login-model';
 import { emailSchema, passwordSchema } from '../../../../shared/forms/field-schemas';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
@@ -11,6 +12,8 @@ import { emailSchema, passwordSchema } from '../../../../shared/forms/field-sche
   templateUrl: './login-page.html',
 })
 export class LoginPage implements AfterViewInit {
+
+  router = inject(Router);
 
   lottieOptions: AnimationOptions = {
     path: '/animations/loginLottie.json',
@@ -56,6 +59,10 @@ export class LoginPage implements AfterViewInit {
       duration: 1,
       ease: 'elastic.out(1, 0.6)',
     }, '-=0.6');
+  }
+
+  goto(){
+    this.router.navigate(['/dashboard']);
   }
 
 }

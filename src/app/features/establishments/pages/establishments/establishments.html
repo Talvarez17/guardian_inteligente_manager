@@ -1,0 +1,90 @@
+<section class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">Establecimientos</h1>
+    <p class="text-sm text-base-content/60">Administra los establecimientos, su información y estatus comercial.</p>
+  </div>
+  <a routerLink="/establecimientos/nuevo" class="btn btn-primary">
+    <i class="material-symbols-rounded text-[18px]">add</i>
+    Nuevo establecimiento
+  </a>
+</section>
+
+<section class="flex flex-wrap items-center gap-3 mt-5">
+  <label class="input flex-1 min-w-55">
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </g>
+    </svg>
+    <input class="w-full" type="search" placeholder="Buscar por nombre comercial o razón social..." (input)="onSearchInput($event)" />
+  </label>
+
+  <select class="select w-44" (change)="onBusinessTypeChange($event)">
+    <option value="">Giro comercial</option>
+    @for (businessType of businessTypeOptions; track businessType) {
+    <option [value]="businessType">{{ businessType }}</option>
+    }
+  </select>
+
+  <select class="select w-40" (change)="onRiskChange($event)">
+    <option value="">Riesgo</option>
+    @for (risk of riskOptions; track risk) {
+    <option [value]="risk">{{ risk }}</option>
+    }
+  </select>
+
+  <select class="select w-48" (change)="onManagerChange($event)">
+    <option value="">Responsable</option>
+    @for (manager of managerOptions; track manager) {
+    <option [value]="manager">{{ manager }}</option>
+    }
+  </select>
+</section>
+
+<section class="card bg-base-100 shadow-sm mt-4 mb-6">
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Establecimiento</th>
+          <th>Giro</th>
+          <th>Responsable</th>
+          <th>Riesgo</th>
+          <th>Estatus</th>
+          <th>Cobro mensual</th>
+          <th>GIA / COVIA</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of filtered(); track item.id) {
+        <tr>
+          <td>
+            <p class="font-semibold text-base-content">{{ item.tradeName }}</p>
+            <p class="text-xs text-base-content/50">{{ item.legalName }}</p>
+          </td>
+          <td>{{ item.businessType }}</td>
+          <td>{{ item.assignedManager }}</td>
+          <td><span class="badge badge-soft" [class]="riskBadgeClass(item.risk)">{{ item.risk }}</span></td>
+          <td><span class="badge badge-soft" [class]="statusBadgeClass(item.status)">{{ item.status }}</span></td>
+          <td>{{ item.monthlyFee | currency }}</td>
+          <td>
+            <div class="flex gap-1">
+              <span class="badge badge-sm" [class]="item.gia ? 'badge-success' : 'badge-ghost'">GIA</span>
+              <span class="badge badge-sm" [class]="item.covia ? 'badge-success' : 'badge-ghost'">COVIA</span>
+            </div>
+          </td>
+          <td>
+            <a [routerLink]="['/establecimientos', item.id]" class="link link-primary text-sm font-medium no-underline hover:underline">Ver</a>
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="8" class="text-center text-base-content/50 py-10">No se encontraron establecimientos con esos filtros.</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

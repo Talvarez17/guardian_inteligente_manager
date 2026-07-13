@@ -1,0 +1,22 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body p-5 gap-3">
+    <h2 class="font-bold text-base-content">Vencimientos próximos</h2>
+    <div class="flex flex-col gap-3">
+      @for (item of expirations; track item.title) {
+      <a [routerLink]="['/establecimientos', item.establishmentId]" class="flex items-start gap-3 rounded-lg -mx-1 px-1 py-1 transition-colors hover:bg-base-200">
+        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold" [class]="extBadgeClass(item.ext)">
+          {{ item.ext }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-semibold text-base-content">{{ item.title }}</p>
+          <p class="text-xs text-base-content/50">{{ item.entity }}</p>
+        </div>
+        <div class="flex flex-col items-end gap-1 shrink-0">
+          <span class="text-xs text-base-content/50 whitespace-nowrap">{{ item.date }}</span>
+          <span class="badge badge-soft" [class]="statusBadgeClass(item.status)">{{ item.status }}</span>
+        </div>
+      </a>
+      }
+    </div>
+  </div>
+</div>

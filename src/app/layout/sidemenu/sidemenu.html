@@ -1,0 +1,76 @@
+<aside class="relative my-4 ml-4 flex h-[calc(100vh-2rem)] flex-col text-white/85 transition-[width] duration-300 ease-in-out" [class.w-64]="!collapsed()" [class.w-20]="collapsed()">
+
+  <div class="absolute inset-0 overflow-hidden rounded-box shadow-2xl shadow-secondary/30"
+    style="background: linear-gradient(160deg, var(--color-secondary), oklch(0.34 0.2 245));">
+    <div class="pointer-events-none absolute -top-16 -right-16 size-52 rounded-full"
+      style="background: radial-gradient(circle, oklch(0.78 0.15 195 / 0.2), transparent 70%);"></div>
+  </div>
+
+  <button type="button" (click)="toggleCollapse()"
+    class="btn btn-circle btn-sm absolute -right-3 top-7 z-20 border-none bg-base-100 text-secondary shadow-md hover:bg-base-300">
+    <i class="material-symbols-rounded transition-transform duration-300" style="font-size: 0.9rem;"
+      [class.rotate-180]="collapsed()">chevron_left</i>
+  </button>
+
+  <div class="relative z-10 flex items-center gap-3 px-6 py-7" [class.justify-center]="collapsed()" [class.px-0]="collapsed()">
+
+    <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-base-100 text-primary shadow-lg shadow-black/10">
+      <i class="material-symbols-rounded" style="font-size: 1.3rem;">shield</i>
+    </div>
+
+    @if (!collapsed()) {
+    <div class="min-w-0">
+      <div class="text-base font-bold tracking-tight text-white whitespace-nowrap">Guardian</div>
+      <div class="text-[11px] font-medium text-white/55">Panel de seguridad</div>
+    </div>
+    }
+  </div>
+
+  <nav class="relative z-10 flex w-full flex-1 flex-col gap-1 px-3.5 pb-3">
+    @for (item of menuItems; track item.key) {
+    <a [routerLink]="['/', item.key]" routerLinkActive="bg-base-100 text-secondary font-bold shadow-sm"
+      #rla="routerLinkActive"
+      class="tooltip tooltip-right flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-[13.5px] transition-colors"
+      [attr.data-tip]="collapsed() ? item.label : null" [class.justify-center]="collapsed()"
+      [class]="!rla.isActive ? 'text-white/70 font-semibold hover:bg-white/6' : ''">
+
+      <span class="flex size-4.5 shrink-0 items-center justify-center">
+        <i class="material-symbols-rounded text-[18px]" [class]="rla.isActive ? 'text-primary' : 'text-white'">{{ item.icon }}</i>
+      </span>
+
+      @if (!collapsed()) {
+      <span class="flex-1 truncate text-left">{{ item.label }}</span>
+      }
+    </a>
+    }
+  </nav>
+
+  <div class="relative z-10 mx-3.5 mb-2 border-t border-white/10 pt-2">
+    <button type="button" (click)="toggleTheme()"
+      class="tooltip tooltip-right flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-[13.5px] font-semibold text-white/70 transition-colors hover:bg-white/6"
+      [attr.data-tip]="collapsed() ? (isDark() ? 'Tema claro' : 'Tema oscuro') : null"
+      [class.justify-center]="collapsed()">
+      <span class="flex size-4.5 shrink-0 items-center justify-center">
+        <i class="material-symbols-rounded text-[18px] text-white">{{ isDark() ? 'light_mode' : 'dark_mode' }}</i>
+      </span>
+      @if (!collapsed()) {
+      <span class="flex-1 truncate text-left">{{ isDark() ? 'Tema claro' : 'Tema oscuro' }}</span>
+      }
+    </button>
+  </div>
+
+  <div class="relative z-10 mx-3.5 mb-3.5 flex items-center gap-2.5 rounded-2xl bg-base-100 p-3 shadow-sm"
+    [class.justify-center]="collapsed()">
+    <div class="avatar avatar-placeholder shrink-0">
+      <div class="bg-primary text-primary-content w-8 rounded-full">
+        <span class="text-[12.5px] font-bold">MT</span>
+      </div>
+    </div>
+    @if (!collapsed()) {
+    <div class="min-w-0">
+      <div class="text-[12.5px] font-bold text-secondary whitespace-nowrap">Mariana Torres</div>
+      <div class="text-[11px] text-secondary/60">Administradora</div>
+    </div>
+    }
+  </div>
+</aside>

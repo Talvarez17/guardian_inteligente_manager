@@ -1,0 +1,18 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body p-5 gap-3">
+    <h2 class="font-bold text-base-content">Aforo y momentos top</h2>
+    <div class="flex flex-col gap-3">
+      @for (item of capacity; track item.name) {
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="truncate text-sm font-semibold text-base-content">{{ item.name }}</p>
+          <p class="text-xs text-base-content/50">Aforo: {{ item.current }}/{{ item.total }}</p>
+          <p class="text-xs text-base-content/50">Top del día: {{ item.topRange }}</p>
+        </div>
+        <span class="text-sm font-bold text-primary shrink-0">{{ item.percent }}%</span>
+      </div>
+      }
+    </div>
+    <a class="link link-primary text-sm font-medium no-underline hover:underline mt-1">Ir a aforo y momentos top →</a>
+  </div>
+</div>

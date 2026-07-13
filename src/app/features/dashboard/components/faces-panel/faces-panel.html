@@ -1,0 +1,14 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body p-5 gap-3">
+    <h2 class="font-bold text-base-content">Rostros monitoreados</h2>
+    <div class="flex flex-col gap-3">
+      @for (item of faces; track item.name) {
+      <div>
+        <p class="text-sm font-semibold text-base-content">{{ item.name }}</p>
+        <p class="text-xs text-base-content/50">{{ item.place }} · {{ item.tag }}</p>
+      </div>
+      }
+    </div>
+    <a class="link link-primary text-sm font-medium no-underline hover:underline mt-1">Ir a rostros por establecimiento →</a>
+  </div>
+</div>

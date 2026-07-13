@@ -1,0 +1,228 @@
+<section class="flex items-start justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">Nuevo establecimiento</h1>
+    <p class="text-sm text-base-content/60">Registra la información general, de contacto y comercial del establecimiento.</p>
+  </div>
+  <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
+    <i class="material-symbols-rounded text-[18px]">arrow_back</i>
+    Volver
+  </a>
+</section>
+
+<form class="mt-5 flex flex-col gap-4 mb-6" (submit)="$event.preventDefault()">
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content">Datos generales</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="fieldset">
+          <span class="label text-xs">Nombre comercial</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.tradeName" />
+          @if (establishmentForm.tradeName().invalid() && establishmentForm.tradeName().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.tradeName().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Razón social</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.legalName" />
+          @if (establishmentForm.legalName().invalid() && establishmentForm.legalName().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.legalName().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">RFC</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.rfc" />
+          @if (establishmentForm.rfc().invalid() && establishmentForm.rfc().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.rfc().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Giro comercial</span>
+          <select class="select w-full" [formField]="establishmentForm.businessType">
+            @for (businessType of businessTypeOptions; track businessType) {
+            <option [value]="businessType">{{ businessType }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content">Ubicación</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <label class="fieldset sm:col-span-2">
+          <span class="label text-xs">Calle</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.street" />
+          @if (establishmentForm.street().invalid() && establishmentForm.street().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.street().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Colonia</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.neighborhood" />
+          @if (establishmentForm.neighborhood().invalid() && establishmentForm.neighborhood().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.neighborhood().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Número exterior</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.exteriorNumber" />
+          @if (establishmentForm.exteriorNumber().invalid() && establishmentForm.exteriorNumber().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.exteriorNumber().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Número interior</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.interiorNumber" />
+          @if (establishmentForm.interiorNumber().invalid() && establishmentForm.interiorNumber().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.interiorNumber().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Estado</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.state" />
+          @if (establishmentForm.state().invalid() && establishmentForm.state().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.state().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Municipio</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.municipality" />
+          @if (establishmentForm.municipality().invalid() && establishmentForm.municipality().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.municipality().errors()[0].message }}</p>
+          }
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content">Contacto</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <label class="fieldset">
+          <span class="label text-xs">Nombre de contacto principal</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.contactName" />
+          @if (establishmentForm.contactName().invalid() && establishmentForm.contactName().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.contactName().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Teléfono de contacto</span>
+          <input type="text" class="input w-full" [formField]="establishmentForm.contactPhone" />
+          @if (establishmentForm.contactPhone().invalid() && establishmentForm.contactPhone().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.contactPhone().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Correo</span>
+          <input type="email" class="input w-full" [formField]="establishmentForm.email" />
+          @if (establishmentForm.email().invalid() && establishmentForm.email().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.email().errors()[0].message }}</p>
+          }
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content">Comercial y cobranza</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <label class="fieldset">
+          <span class="label text-xs">Responsable asignado</span>
+          <select class="select w-full" [formField]="establishmentForm.assignedManager">
+            @for (manager of managerOptions; track manager) {
+            <option [value]="manager">{{ manager }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Paquete contratado</span>
+          <select class="select w-full" [formField]="establishmentForm.contractedPackage">
+            @for (pkg of packageOptions; track pkg) {
+            <option [value]="pkg">{{ pkg }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Cobro mensual</span>
+          <input type="number" step="0.01" class="input w-full" [formField]="establishmentForm.monthlyFee" />
+          @if (establishmentForm.monthlyFee().invalid() && establishmentForm.monthlyFee().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.monthlyFee().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Cámaras instaladas</span>
+          <input type="number" class="input w-full" [formField]="establishmentForm.installedCameras" />
+          @if (establishmentForm.installedCameras().invalid() && establishmentForm.installedCameras().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.installedCameras().errors()[0].message }}</p>
+          }
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content">Riesgo y cumplimiento</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <label class="fieldset">
+          <span class="label text-xs">Estatus</span>
+          <select class="select w-full" [formField]="establishmentForm.status">
+            @for (status of statusOptions; track status) {
+            <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Riesgo</span>
+          <select class="select w-full" [formField]="establishmentForm.risk">
+            @for (risk of riskOptions; track risk) {
+            <option [value]="risk">{{ risk }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer h-12">
+          <input type="checkbox" class="checkbox checkbox-primary" [formField]="establishmentForm.gia" />
+          <span class="text-sm font-medium text-base-content">GIA</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer h-12">
+          <input type="checkbox" class="checkbox checkbox-primary" [formField]="establishmentForm.covia" />
+          <span class="text-sm font-medium text-base-content">COVIA</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content">Observaciones</h2>
+      <textarea class="textarea w-full" rows="3" [formField]="establishmentForm.notes"></textarea>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="save()">Guardar establecimiento</button>
+  </div>
+
+</form>
