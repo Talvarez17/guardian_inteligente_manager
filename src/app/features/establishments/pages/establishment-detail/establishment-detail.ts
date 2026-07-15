@@ -3,10 +3,11 @@ import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { EstablishmentModel } from '../../models/establishment-model';
 import { EstablishmentsStore } from '../../services/establishments-store';
+import { DocumentsPanel } from '../../components/documents-panel/documents-panel';
 
 @Component({
   selector: 'app-establishment-detail',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink, CurrencyPipe, DocumentsPanel],
   templateUrl: './establishment-detail.html',
 })
 export class EstablishmentDetail {

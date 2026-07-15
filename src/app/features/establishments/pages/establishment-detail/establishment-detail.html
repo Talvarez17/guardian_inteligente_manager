@@ -2,30 +2,45 @@
 
 <section class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
   <div>
-    <div class="flex flex-wrap items-center gap-2">
-      <h1 class="text-2xl font-bold text-base-content">{{ item.tradeName }}</h1>
-      <span class="badge badge-soft" [class]="statusBadgeClass(item.status)">{{ item.status }}</span>
-      <span class="badge badge-soft" [class]="riskBadgeClass(item.risk)">Riesgo {{ item.risk }}</span>
-    </div>
-    <p class="text-sm text-base-content/60">{{ item.legalName }} · {{ item.rfc }}</p>
+    <h1 class="text-2xl font-bold text-base-content">{{ item.tradeName }}</h1>
+    <p class="text-sm text-base-content/60">{{ item.legalName }}</p>
   </div>
   <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
-    <i class="material-symbols-rounded text-[18px]">arrow_back</i>
+    <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
     Volver
   </a>
 </section>
 
-<section class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+<section class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+  <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Estatus</p>
+    <span class="badge badge-soft mt-1" [class]="statusBadgeClass(item.status)">{{ item.status }}</span>
+  </div>
+  <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Riesgo</p>
+    <span class="badge badge-soft mt-1" [class]="riskBadgeClass(item.risk)">{{ item.risk }}</span>
+  </div>
+  <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">RFC</p>
+    <p class="mt-1 text-sm font-bold text-base-content font-mono">{{ item.rfc }}</p>
+  </div>
+</section>
+
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body gap-3">
-      <h2 class="font-bold text-base-content">Ubicación</h2>
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">location_on</i>
+        Ubicación
+      </h2>
       <dl class="flex flex-col gap-2 text-sm">
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Calle</dt><dd class="font-medium text-base-content text-right">{{ item.street }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Número exterior</dt><dd class="font-medium text-base-content text-right">{{ item.exteriorNumber }}</dd></div>
         @if (item.interiorNumber) {
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Número interior</dt><dd class="font-medium text-base-content text-right">{{ item.interiorNumber }}</dd></div>
         }
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Código postal</dt><dd class="font-medium text-base-content text-right">{{ item.postalCode }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Colonia</dt><dd class="font-medium text-base-content text-right">{{ item.neighborhood }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Estado</dt><dd class="font-medium text-base-content text-right">{{ item.state }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Municipio</dt><dd class="font-medium text-base-content text-right">{{ item.municipality }}</dd></div>
@@ -36,18 +51,10 @@
 
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body gap-3">
-      <h2 class="font-bold text-base-content">Contacto</h2>
-      <dl class="flex flex-col gap-2 text-sm">
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Nombre de contacto</dt><dd class="font-medium text-base-content text-right">{{ item.contactName }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Teléfono</dt><dd class="font-medium text-base-content text-right">{{ item.contactPhone }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Correo</dt><dd class="font-medium text-base-content text-right">{{ item.email }}</dd></div>
-      </dl>
-    </div>
-  </div>
-
-  <div class="card bg-base-100 shadow-sm">
-    <div class="card-body gap-3">
-      <h2 class="font-bold text-base-content">Comercial y cobranza</h2>
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">payments</i>
+        Comercial y cobranza
+      </h2>
       <dl class="flex flex-col gap-2 text-sm">
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Responsable asignado</dt><dd class="font-medium text-base-content text-right">{{ item.assignedManager }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Paquete contratado</dt><dd class="font-medium text-base-content text-right">{{ item.contractedPackage }}</dd></div>
@@ -57,32 +64,44 @@
     </div>
   </div>
 
-  <div class="card bg-base-100 shadow-sm">
+  <div class="card bg-base-100 shadow-sm md:col-span-2">
     <div class="card-body gap-3">
-      <h2 class="font-bold text-base-content">Riesgo y cumplimiento</h2>
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">call</i>
+        Contacto
+      </h2>
       <dl class="flex flex-col gap-2 text-sm">
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">GIA</dt><dd class="font-medium text-base-content text-right">{{ item.gia ? 'Sí' : 'No' }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">COVIA</dt><dd class="font-medium text-base-content text-right">{{ item.covia ? 'Sí' : 'No' }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Nombre de contacto</dt><dd class="font-medium text-base-content text-right">{{ item.contactName }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Teléfono</dt><dd class="font-medium text-base-content text-right">{{ item.contactPhone }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Correo</dt><dd class="font-medium text-base-content text-right">{{ item.email }}</dd></div>
+      </dl>
+
+      <div class="divider my-1 text-xs font-semibold uppercase tracking-wide text-base-content/40">Sistemas asignados</div>
+
+      <dl class="flex flex-col gap-2 text-sm">
+        <div class="flex justify-between items-center gap-3">
+          <dt class="text-base-content/50">GIA</dt>
+          <dd><span class="badge badge-soft" [class]="item.gia ? 'badge-success' : 'badge-ghost'">{{ item.gia ? 'Activo' : 'Inactivo' }}</span></dd>
+        </div>
+        <div class="flex justify-between items-center gap-3">
+          <dt class="text-base-content/50">COVIA</dt>
+          <dd><span class="badge badge-soft" [class]="item.covia ? 'badge-success' : 'badge-ghost'">{{ item.covia ? 'Activo' : 'Inactivo' }}</span></dd>
+        </div>
       </dl>
     </div>
   </div>
 
   <div class="card bg-base-100 shadow-sm md:col-span-2">
     <div class="card-body gap-3">
-      <h2 class="font-bold text-base-content">Observaciones</h2>
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">sticky_note_2</i>
+        Observaciones
+      </h2>
       <p class="text-sm text-base-content/70">{{ item.notes || 'Sin observaciones registradas.' }}</p>
     </div>
   </div>
 
-  <div class="card bg-base-100 shadow-sm md:col-span-2">
-    <div class="card-body items-center gap-2 py-10 text-center">
-      <div class="flex size-12 items-center justify-center rounded-2xl bg-info/15">
-        <i class="material-symbols-rounded text-[24px] text-info">description</i>
-      </div>
-      <h2 class="font-bold text-base-content">Documentos</h2>
-      <p class="text-sm text-base-content/60 max-w-sm">La gestión de documentos de este establecimiento estará disponible próximamente.</p>
-    </div>
-  </div>
+  <app-documents-panel [establishmentId]="item.id" />
 
 </section>
 

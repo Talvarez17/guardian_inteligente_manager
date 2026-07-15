@@ -1,10 +1,16 @@
-<section class="flex items-start justify-between gap-3">
+<section class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
   <div>
-    <h1 class="text-2xl font-bold text-base-content">Nuevo establecimiento</h1>
-    <p class="text-sm text-base-content/60">Registra la información general, de contacto y comercial del establecimiento.</p>
+    <h1 class="text-2xl font-bold text-base-content">{{ isEditMode() ? 'Editar establecimiento' : 'Nuevo establecimiento' }}</h1>
+    <p class="text-sm text-base-content/60">
+      @if (isEditMode()) {
+      Actualiza la información general, de contacto y comercial del establecimiento.
+      } @else {
+      Registra la información general, de contacto y comercial del establecimiento.
+      }
+    </p>
   </div>
   <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
-    <i class="material-symbols-rounded text-[18px]">arrow_back</i>
+    <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
     Volver
   </a>
 </section>
@@ -88,8 +94,21 @@
         </label>
 
         <label class="fieldset">
+          <span class="label text-xs">Código postal</span>
+          <input type="text" inputmode="numeric" class="input w-full" [formField]="establishmentForm.postalCode" />
+          @if (establishmentForm.postalCode().invalid() && establishmentForm.postalCode().touched()) {
+          <p class="text-error text-xs mt-1">{{ establishmentForm.postalCode().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
           <span class="label text-xs">Estado</span>
-          <input type="text" class="input w-full" [formField]="establishmentForm.state" />
+          <select class="select w-full" [formField]="establishmentForm.state">
+            <option value="" disabled>Selecciona un estado</option>
+            @for (state of stateOptions; track state) {
+            <option [value]="state">{{ state }}</option>
+            }
+          </select>
           @if (establishmentForm.state().invalid() && establishmentForm.state().touched()) {
           <p class="text-error text-xs mt-1">{{ establishmentForm.state().errors()[0].message }}</p>
           }
@@ -97,7 +116,12 @@
 
         <label class="fieldset">
           <span class="label text-xs">Municipio</span>
-          <input type="text" class="input w-full" [formField]="establishmentForm.municipality" />
+          <select class="select w-full" [formField]="establishmentForm.municipality">
+            <option value="" disabled>Selecciona un municipio</option>
+            @for (municipality of municipalityOptions(); track municipality) {
+            <option [value]="municipality">{{ municipality }}</option>
+            }
+          </select>
           @if (establishmentForm.municipality().invalid() && establishmentForm.municipality().touched()) {
           <p class="text-error text-xs mt-1">{{ establishmentForm.municipality().errors()[0].message }}</p>
           }
@@ -178,37 +202,50 @@
     </div>
   </div>
 
-  <div class="card bg-base-100 shadow-sm">
-    <div class="card-body gap-4">
-      <h2 class="font-bold text-base-content">Riesgo y cumplimiento</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-        <label class="fieldset">
-          <span class="label text-xs">Estatus</span>
-          <select class="select w-full" [formField]="establishmentForm.status">
-            @for (status of statusOptions; track status) {
-            <option [value]="status">{{ status }}</option>
-            }
-          </select>
-        </label>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body gap-4">
+        <h2 class="font-bold text-base-content">Riesgo y estatus</h2>
 
-        <label class="fieldset">
-          <span class="label text-xs">Riesgo</span>
-          <select class="select w-full" [formField]="establishmentForm.risk">
-            @for (risk of riskOptions; track risk) {
-            <option [value]="risk">{{ risk }}</option>
-            }
-          </select>
-        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
 
-        <label class="flex items-center gap-2 cursor-pointer h-12">
-          <input type="checkbox" class="checkbox checkbox-primary" [formField]="establishmentForm.gia" />
-          <span class="text-sm font-medium text-base-content">GIA</span>
-        </label>
+          <label class="fieldset">
+            <span class="label text-xs">Estatus</span>
+            <select class="select w-full" [formField]="establishmentForm.status">
+              @for (status of statusOptions; track status) {
+              <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </label>
 
-        <label class="flex items-center gap-2 cursor-pointer h-12">
-          <input type="checkbox" class="checkbox checkbox-primary" [formField]="establishmentForm.covia" />
-          <span class="text-sm font-medium text-base-content">COVIA</span>
-        </label>
+          <label class="fieldset">
+            <span class="label text-xs">Riesgo</span>
+            <select class="select w-full" [formField]="establishmentForm.risk">
+              @for (risk of riskOptions; track risk) {
+              <option [value]="risk">{{ risk }}</option>
+              }
+            </select>
+          </label>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body gap-4">
+        <h2 class="font-bold text-base-content">Sistemas asignados</h2>
+
+        <div class="grid grid-cols-2 gap-4">
+          <label class="flex items-center gap-2 cursor-pointer h-12">
+            <input type="checkbox" class="toggle toggle-primary" [formField]="establishmentForm.gia" />
+            <span class="text-sm font-medium text-base-content">GIA</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer h-12">
+            <input type="checkbox" class="toggle toggle-primary" [formField]="establishmentForm.covia" />
+            <span class="text-sm font-medium text-base-content">COVIA</span>
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -220,9 +257,9 @@
     </div>
   </div>
 
-  <div class="flex justify-end gap-2">
+  <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
     <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
-    <button type="button" class="btn btn-primary" (click)="save()">Guardar establecimiento</button>
+    <button type="button" class="btn btn-primary" (click)="save()">{{ isEditMode() ? 'Guardar cambios' : 'Guardar establecimiento' }}</button>
   </div>
 
 </form>

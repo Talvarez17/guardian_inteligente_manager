@@ -67,14 +67,37 @@ export class Establishments {
     }
   }
 
-  riskBadgeClass(risk: EstablishmentModel['risk']): string {
+  statusIcon(status: EstablishmentModel['status']): string {
+    switch (status) {
+      case 'Activo':
+        return 'check_circle';
+      case 'Prospecto':
+        return 'info';
+      case 'Baja':
+        return 'error';
+    }
+  }
+
+  riskBarClasses(risk: EstablishmentModel['risk']): [string, string, string] {
+    const off = 'bg-base-300';
     switch (risk) {
       case 'Bajo':
-        return 'badge-success';
+        return ['bg-success', off, off];
       case 'Medio':
-        return 'badge-warning';
+        return ['bg-warning', 'bg-warning', off];
       case 'Alto':
-        return 'badge-error';
+        return ['bg-error', 'bg-error', 'bg-error'];
+    }
+  }
+
+  riskTextClass(risk: EstablishmentModel['risk']): string {
+    switch (risk) {
+      case 'Bajo':
+        return 'text-success';
+      case 'Medio':
+        return 'text-warning';
+      case 'Alto':
+        return 'text-error';
     }
   }
 }

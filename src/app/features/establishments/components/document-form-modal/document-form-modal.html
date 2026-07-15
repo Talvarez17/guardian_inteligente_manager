@@ -1,0 +1,79 @@
+<dialog #dialogRef class="modal">
+  <div class="modal-box w-11/12 max-w-2xl">
+    <h3 class="text-lg font-bold text-base-content">{{ editingId() ? 'Editar documento' : 'Nuevo documento' }}</h3>
+
+    <div class="flex flex-col gap-4 mt-4">
+      <label class="fieldset">
+        <span class="label text-xs">Nombre del documento</span>
+        <input type="text" class="input w-full" [formField]="documentForm.name" />
+        @if (documentForm.name().invalid() && documentForm.name().touched()) {
+        <p class="text-error text-xs mt-1">{{ documentForm.name().errors()[0].message }}</p>
+        }
+      </label>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="fieldset">
+          <span class="label text-xs">Área documental</span>
+          <select class="select w-full" [formField]="documentForm.area">
+            @for (area of areaOptions; track area) {
+            <option [value]="area">{{ area }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Estatus</span>
+          <select class="select w-full" [formField]="documentForm.status">
+            @for (status of statusOptions; track status) {
+            <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Versión</span>
+          <input type="text" class="input w-full" [formField]="documentForm.version" />
+        </label>
+
+        <div class="fieldset">
+          <span class="label text-xs">Fecha de vencimiento</span>
+          <div class="dropdown w-full">
+            <div tabindex="0" role="button" class="btn btn-outline w-full justify-start font-normal">
+              <i class="material-symbols-rounded text-[18px]!">calendar_month</i>
+              {{ model().expirationDate || 'Selecciona una fecha' }}
+            </div>
+            <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow-lg p-2">
+              <calendar-date class="cally" [attr.value]="model().expirationDate" (change)="onExpirationChange($event)">
+                <calendar-month></calendar-month>
+              </calendar-date>
+            </div>
+          </div>
+          @if (expirationInvalid()) {
+          <p class="text-error text-xs mt-1">La fecha de vencimiento es requerida</p>
+          }
+        </div>
+      </div>
+
+      <label class="fieldset">
+        <span class="label text-xs">Archivo</span>
+        <input type="file" class="file-input w-full" (change)="onFileSelected($event)" />
+        @if (model().fileName) {
+        <span class="text-xs text-base-content/50 mt-1">{{ model().fileName }}</span>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Observaciones</span>
+        <textarea class="textarea w-full" rows="3" [formField]="documentForm.notes"></textarea>
+      </label>
+    </div>
+
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
+      <button type="button" class="btn btn-primary" (click)="save()">Guardar</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

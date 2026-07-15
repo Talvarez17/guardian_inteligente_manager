@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { FormField, apply, form } from '@angular/forms/signals';
+import { FormField, apply, disabled, form } from '@angular/forms/signals';
 import { EstablishmentModel } from '../../models/establishment-model';
 import {
   STATUS_OPTIONS,
@@ -10,12 +10,14 @@ import {
   RISK_OPTIONS,
 } from '../../models/establishment-options';
 import { EstablishmentsStore } from '../../services/establishments-store';
+import { MEXICO_STATES, getMunicipalitiesByState } from '../../../../shared/data/mx-locations';
 import {
   emailSchema,
   exteriorNumberSchema,
   interiorNumberSchema,
   phoneSchema,
   positiveNumberSchema,
+  postalCodeSchema,
   requiredTextSchema,
   rfcSchema,
 } from '../../../../shared/forms/field-schemas';
@@ -31,11 +33,15 @@ export class EstablishmentForm {
   private readonly router = inject(Router);
   private readonly store = inject(EstablishmentsStore);
 
+  readonly id = input<string>();
+  readonly isEditMode = computed(() => !!this.id());
+
   readonly businessTypeOptions = BUSINESS_TYPE_OPTIONS;
   readonly managerOptions = MANAGER_OPTIONS;
   readonly packageOptions = PACKAGE_OPTIONS;
   readonly statusOptions = STATUS_OPTIONS;
   readonly riskOptions = RISK_OPTIONS;
+  readonly stateOptions = MEXICO_STATES.map((state) => state.name);
 
   readonly model = signal<EstablishmentFormModel>({
     tradeName: '',
@@ -47,6 +53,7 @@ export class EstablishmentForm {
     neighborhood: '',
     state: '',
     municipality: '',
+    postalCode: '',
     contactName: '',
     contactPhone: '',
     email: '',
@@ -72,11 +79,35 @@ export class EstablishmentForm {
     apply(f.neighborhood, requiredTextSchema);
     apply(f.state, requiredTextSchema);
     apply(f.municipality, requiredTextSchema);
+    disabled(f.municipality, ({ valueOf }) => valueOf(f.state) === '');
+    apply(f.postalCode, postalCodeSchema);
     apply(f.contactName, requiredTextSchema);
     apply(f.contactPhone, phoneSchema);
     apply(f.email, emailSchema);
     apply(f.monthlyFee, positiveNumberSchema);
     apply(f.installedCameras, positiveNumberSchema);
+  });
+
+  readonly municipalityOptions = computed(() => getMunicipalitiesByState(this.model().state));
+
+  private readonly loadExistingOnEdit = effect(() => {
+    const id = this.id();
+    if (!id) {
+      return;
+    }
+    const existing = this.store.getById(id);
+    if (existing) {
+      const { id: _id, ...rest } = existing;
+      this.model.set(rest);
+    }
+  });
+
+  private readonly resetMunicipalityOnStateChange = effect(() => {
+    const options = this.municipalityOptions();
+    const current = this.model().municipality;
+    if (current && !options.includes(current)) {
+      this.model.update((value) => ({ ...value, municipality: '' }));
+    }
   });
 
   save(): void {
@@ -85,7 +116,12 @@ export class EstablishmentForm {
       return;
     }
 
-    this.store.add({ id: this.slugify(this.model().tradeName), ...this.model() });
+    const id = this.id();
+    if (id) {
+      this.store.update(id, this.model());
+    } else {
+      this.store.add({ id: this.slugify(this.model().tradeName), ...this.model() });
+    }
     this.router.navigate(['/establecimientos']);
   }
 

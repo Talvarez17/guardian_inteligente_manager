@@ -1,8 +1,9 @@
-import { email, min, minLength, pattern, required, schema } from '@angular/forms/signals';
+import { email, maxLength, min, minLength, pattern, required, schema } from '@angular/forms/signals';
 
-const RFC_PATTERN = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
+const RFC_PATTERN = /^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/;
 const STREET_NUMBER_PATTERN = /^[a-zA-Z0-9-]+$/;
-const PHONE_PATTERN = /^\+?[\d\s-]{10,15}$/;
+const PHONE_PATTERN = /^\d{10}$/;
+const POSTAL_CODE_PATTERN = /^\d{5}$/;
 
 export const emailSchema = schema<string>((field) => {
   required(field, { message: 'El correo electrónico es requerido' });
@@ -25,6 +26,7 @@ export const positiveNumberSchema = schema<number>((field) => {
 
 export const rfcSchema = schema<string>((field) => {
   required(field, { message: 'El RFC es requerido' });
+  maxLength(field, 12, { message: 'El RFC debe tener 12 caracteres' });
   pattern(field, RFC_PATTERN, { message: 'El RFC no tiene un formato válido' });
 });
 
@@ -39,5 +41,12 @@ export const interiorNumberSchema = schema<string>((field) => {
 
 export const phoneSchema = schema<string>((field) => {
   required(field, { message: 'El teléfono es requerido' });
+  maxLength(field, 10, { message: 'El teléfono debe tener 10 dígitos' });
   pattern(field, PHONE_PATTERN, { message: 'El teléfono no tiene un formato válido' });
+});
+
+export const postalCodeSchema = schema<string>((field) => {
+  required(field, { message: 'El código postal es requerido' });
+  maxLength(field, 5, { message: 'El código postal debe tener 5 dígitos' });
+  pattern(field, POSTAL_CODE_PATTERN, { message: 'El código postal debe tener 5 dígitos' });
 });

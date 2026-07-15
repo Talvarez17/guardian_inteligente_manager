@@ -15,6 +15,7 @@ export class EstablishmentsStore {
       neighborhood: 'Del Valle',
       state: 'Ciudad de México',
       municipality: 'Benito Juárez',
+      postalCode: '03100',
       contactName: 'Ricardo Null',
       contactPhone: '55 1234 5678',
       email: 'contacto@adiosamor.mx',
@@ -40,6 +41,7 @@ export class EstablishmentsStore {
       neighborhood: 'Centro',
       state: 'Jalisco',
       municipality: 'Guadalajara',
+      postalCode: '44100',
       contactName: 'Fernanda Ruiz',
       contactPhone: '33 9876 5432',
       email: 'admin@barlaselva.mx',
@@ -65,6 +67,7 @@ export class EstablishmentsStore {
       neighborhood: 'Zibatá',
       state: 'Querétaro',
       municipality: 'Querétaro',
+      postalCode: '76269',
       contactName: 'Jorge Salas',
       contactPhone: '442 111 2233',
       email: 'gerencia@bigbolaantea.mx',
@@ -90,6 +93,7 @@ export class EstablishmentsStore {
       neighborhood: 'Cuauhtémoc',
       state: 'Ciudad de México',
       municipality: 'Cuauhtémoc',
+      postalCode: '06500',
       contactName: 'Dra. Patricia Núñez',
       contactPhone: '55 4455 6677',
       email: 'contacto@clinicalajoya.mx',
@@ -112,5 +116,11 @@ export class EstablishmentsStore {
 
   add(establishment: EstablishmentModel): void {
     this.establishments.update((items) => [...items, establishment]);
+  }
+
+  update(id: string, changes: Omit<EstablishmentModel, 'id'>): void {
+    this.establishments.update((items) =>
+      items.map((item) => (item.id === id ? { ...changes, id } : item)),
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Theme } from '../../core/services/theme';
 import { SidemenuItemModel } from '../../core/models/sidemenu-item-model';
@@ -10,6 +10,8 @@ import { SidemenuItemModel } from '../../core/models/sidemenu-item-model';
 })
 export class Sidemenu {
   private readonly themeService = inject(Theme);
+
+  readonly closeMobile = output<void>();
 
   readonly collapsed = signal(false);
   readonly theme = this.themeService.current;
@@ -30,5 +32,9 @@ export class Sidemenu {
 
   toggleTheme(): void {
     this.themeService.toggle();
+  }
+
+  onNavigate(): void {
+    this.closeMobile.emit();
   }
 }

@@ -1,0 +1,61 @@
+<div class="card bg-base-100 shadow-sm md:col-span-2">
+  <div class="card-body gap-3">
+    <div class="flex items-center justify-between gap-3">
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">description</i>
+        Documentos
+      </h2>
+      <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+        <i class="material-symbols-rounded text-[18px]!">add</i>
+        Nuevo documento
+      </button>
+    </div>
+
+    @if (documents().length) {
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Área</th>
+            <th>Versión</th>
+            <th>Estatus</th>
+            <th>Vencimiento</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of documents(); track item.id) {
+          <tr>
+            <td>
+              <p class="font-semibold text-base-content">{{ item.name }}</p>
+              <p class="text-xs text-base-content/50">{{ item.fileName }}</p>
+            </td>
+            <td>{{ item.area }}</td>
+            <td>{{ item.version }}</td>
+            <td><span class="badge badge-soft" [class]="statusBadgeClass(item.status)">{{ item.status }}</span></td>
+            <td>{{ item.expirationDate }}</td>
+            <td>
+              <div class="join">
+                <button type="button" class="btn btn-outline btn-primary btn-sm join-item" (click)="openEdit(item)">
+                  <i class="material-symbols-rounded text-[16px]!">edit</i>
+                  Editar
+                </button>
+                <button type="button" class="btn btn-outline btn-error btn-sm join-item" (click)="removeDocument(item)">
+                  <i class="material-symbols-rounded text-[16px]!">delete</i>
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <p class="text-sm text-base-content/60 py-6 text-center">Aún no hay documentos registrados para este establecimiento.</p>
+    }
+  </div>
+</div>
+
+<app-document-form-modal [establishmentId]="establishmentId()" />

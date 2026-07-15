@@ -12,6 +12,7 @@ export interface EstablishmentModel {
   neighborhood: string;
   state: string;
   municipality: string;
+  postalCode: string;
   contactName: string;
   contactPhone: string;
   email: string;

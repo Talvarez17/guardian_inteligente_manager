@@ -1,14 +1,86 @@
-<section class="flex flex-col gap-1">
-  <h1 class="text-2xl font-bold text-base-content">Planes</h1>
-  <p class="text-sm text-base-content/60">Gestiona los planes Guardian disponibles y sus precios.</p>
+<section class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">Planes</h1>
+    <p class="text-sm text-base-content/60">Gestiona los planes Guardian disponibles y sus precios.</p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">
+    <i class="material-symbols-rounded text-[18px]!">add</i>
+    Nuevo plan
+  </button>
 </section>
 
-<section class="card bg-base-100 shadow-sm mt-5">
-  <div class="card-body items-center gap-3 py-16 text-center">
-    <div class="flex size-14 items-center justify-center rounded-2xl bg-success/10">
-      <i class="material-symbols-rounded text-[28px] text-success">diamond</i>
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-5">
+  @for (item of plans(); track item.id; let i = $index) {
+  <div class="card bg-base-100 shadow-sm overflow-hidden">
+    <div class="relative p-5 text-white bg-linear-to-br" [class]="cardGradient(i)">
+      <div class="absolute top-3 right-3 flex gap-1">
+        <button type="button" class="btn btn-circle btn-ghost btn-xs text-white hover:bg-white/20" (click)="openEdit(item)">
+          <i class="material-symbols-rounded text-[16px]!">edit</i>
+        </button>
+        <button type="button" class="btn btn-circle btn-ghost btn-xs text-white hover:bg-white/20" (click)="removePlan(item)">
+          <i class="material-symbols-rounded text-[16px]!">delete</i>
+        </button>
+      </div>
+      <h2 class="text-xl font-bold">{{ item.name }}</h2>
+      <p class="text-3xl font-extrabold mt-1">${{ item.amount | number: '1.2-2' }}</p>
+      <p class="text-xs opacity-80">Precio base mensual</p>
     </div>
-    <h2 class="font-bold text-base-content">Próximamente</h2>
-    <p class="text-sm text-base-content/60 max-w-sm">Esta sección está en construcción.</p>
+
+    <div class="card-body gap-2 text-sm p-5">
+      <div class="flex items-center justify-between">
+        <span class="text-base-content/60">IVA (16%)</span>
+        <span class="font-semibold text-base-content">${{ ivaOf(item.amount) | number: '1.2-2' }}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-base-content/60">Total con IVA</span>
+        <span class="font-bold text-base-content">${{ totalOf(item.amount) | number: '1.2-2' }}</span>
+      </div>
+
+      <div class="divider my-1"></div>
+
+      <ul class="flex flex-col gap-1.5">
+        @for (feature of item.features; track feature.label) {
+        <li class="flex items-center gap-2 text-xs" [class.text-base-content/40]="!feature.included">
+          <i class="material-symbols-rounded text-[16px]!" [class.text-success]="feature.included" [class.text-error]="!feature.included">
+            {{ feature.included ? 'check_circle' : 'cancel' }}
+          </i>
+          {{ feature.label }}
+        </li>
+        }
+      </ul>
+    </div>
+  </div>
+  } @empty {
+  <p class="text-sm text-base-content/50 col-span-full text-center py-10">Aún no hay planes registrados.</p>
+  }
+</section>
+
+<section class="card bg-base-100 shadow-sm mt-4 mb-6">
+  <div class="card-body gap-3">
+    <h2 class="font-bold text-base-content">Resumen comparativo</h2>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Base</th>
+            <th>IVA</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of plans(); track item.id) {
+          <tr>
+            <td class="font-semibold text-base-content">{{ item.name }}</td>
+            <td>${{ item.amount | number: '1.2-2' }}</td>
+            <td>${{ ivaOf(item.amount) | number: '1.2-2' }}</td>
+            <td>${{ totalOf(item.amount) | number: '1.2-2' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
+
+<app-plan-form-modal />

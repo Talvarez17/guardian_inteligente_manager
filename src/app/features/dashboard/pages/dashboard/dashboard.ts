@@ -30,5 +30,6 @@ export class Dashboard {
     { icon: 'diamond', label: 'Planes', path: '/planes' },
     { icon: 'calendar_month', label: 'Cobranza', path: '/cobranza' },
     { icon: 'pie_chart', label: 'Reportes', path: '/reportes' },
+    { icon: 'settings', label: 'Gestión', path: '/gestion' },
   ];
 }

@@ -1,0 +1,99 @@
+<dialog #dialogRef class="modal">
+  <div class="modal-box w-11/12 max-w-2xl">
+    <h3 class="text-lg font-bold text-base-content">{{ editingId() ? 'Editar plan' : 'Nuevo plan' }}</h3>
+    @if (editingId()) {
+    <p class="text-xs text-base-content/60 mt-1">
+      Este plan está vinculado a Openpay, solo puedes actualizar el nombre, los días de prueba, las características y las observaciones.
+    </p>
+    }
+
+    <div class="flex flex-col gap-4 mt-4">
+      <label class="fieldset">
+        <span class="label text-xs">Nombre del plan</span>
+        <input type="text" class="input w-full" [formField]="planForm.name" />
+        @if (planForm.name().invalid() && planForm.name().touched()) {
+        <p class="text-error text-xs mt-1">{{ planForm.name().errors()[0].message }}</p>
+        }
+      </label>
+
+      @if (editingId()) {
+      <label class="fieldset">
+        <span class="label text-xs">Días de prueba</span>
+        <input type="number" class="input w-full" [formField]="planForm.trialDays" />
+        @if (planForm.trialDays().invalid() && planForm.trialDays().touched()) {
+        <p class="text-error text-xs mt-1">{{ planForm.trialDays().errors()[0].message }}</p>
+        }
+      </label>
+      } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="fieldset">
+          <span class="label text-xs">Monto</span>
+          <input type="number" step="0.01" class="input w-full" [formField]="planForm.amount" />
+          @if (planForm.amount().invalid() && planForm.amount().touched()) {
+          <p class="text-error text-xs mt-1">{{ planForm.amount().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Frecuencia de cobro</span>
+          <input type="number" class="input w-full" [formField]="planForm.repeatEvery" />
+          @if (planForm.repeatEvery().invalid() && planForm.repeatEvery().touched()) {
+          <p class="text-error text-xs mt-1">{{ planForm.repeatEvery().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Unidad de frecuencia</span>
+          <select class="select w-full" [formField]="planForm.repeatUnit">
+            @for (unit of repeatUnitOptions; track unit) {
+            <option [value]="unit">{{ unit }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Días de prueba</span>
+          <input type="number" class="input w-full" [formField]="planForm.trialDays" />
+          @if (planForm.trialDays().invalid() && planForm.trialDays().touched()) {
+          <p class="text-error text-xs mt-1">{{ planForm.trialDays().errors()[0].message }}</p>
+          }
+        </label>
+
+        <label class="fieldset">
+          <span class="label text-xs">Intentos de cobro</span>
+          <input type="number" class="input w-full" [formField]="planForm.retryAttempts" />
+          @if (planForm.retryAttempts().invalid() && planForm.retryAttempts().touched()) {
+          <p class="text-error text-xs mt-1">{{ planForm.retryAttempts().errors()[0].message }}</p>
+          }
+        </label>
+      </div>
+      }
+
+      <label class="fieldset">
+        <span class="label text-xs">Observaciones</span>
+        <textarea class="textarea w-full" rows="2" [formField]="planForm.notes"></textarea>
+      </label>
+
+      <div class="fieldset">
+        <span class="label text-xs">Características incluidas</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          @for (feature of featureCatalog; track feature) {
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" class="toggle toggle-primary toggle-sm" [checked]="isFeatureIncluded(feature)"
+              (change)="toggleFeature(feature)" />
+            <span class="text-sm text-base-content">{{ feature }}</span>
+          </label>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
+      <button type="button" class="btn btn-primary" (click)="save()">Guardar</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

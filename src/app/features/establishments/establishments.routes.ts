@@ -10,6 +10,10 @@ export const ESTABLISHMENTS_ROUTES: Routes = [
     loadComponent: () => import('./pages/establishment-form/establishment-form').then((m) => m.EstablishmentForm),
   },
   {
+    path: ':id/editar',
+    loadComponent: () => import('./pages/establishment-form/establishment-form').then((m) => m.EstablishmentForm),
+  },
+  {
     path: ':id',
     loadComponent: () => import('./pages/establishment-detail/establishment-detail').then((m) => m.EstablishmentDetail),
   },

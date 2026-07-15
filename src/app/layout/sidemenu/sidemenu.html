@@ -29,13 +29,13 @@
   <nav class="relative z-10 flex w-full flex-1 flex-col gap-1 px-3.5 pb-3">
     @for (item of menuItems; track item.key) {
     <a [routerLink]="['/', item.key]" routerLinkActive="bg-base-100 text-secondary font-bold shadow-sm"
-      #rla="routerLinkActive"
+      #rla="routerLinkActive" (click)="onNavigate()"
       class="tooltip tooltip-right flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-[13.5px] transition-colors"
       [attr.data-tip]="collapsed() ? item.label : null" [class.justify-center]="collapsed()"
       [class]="!rla.isActive ? 'text-white/70 font-semibold hover:bg-white/6' : ''">
 
       <span class="flex size-4.5 shrink-0 items-center justify-center">
-        <i class="material-symbols-rounded text-[18px]" [class]="rla.isActive ? 'text-primary' : 'text-white'">{{ item.icon }}</i>
+        <i class="material-symbols-rounded text-[18px]!" [class]="rla.isActive ? 'text-primary' : 'text-white'">{{ item.icon }}</i>
       </span>
 
       @if (!collapsed()) {
@@ -51,7 +51,7 @@
       [attr.data-tip]="collapsed() ? (isDark() ? 'Tema claro' : 'Tema oscuro') : null"
       [class.justify-center]="collapsed()">
       <span class="flex size-4.5 shrink-0 items-center justify-center">
-        <i class="material-symbols-rounded text-[18px] text-white">{{ isDark() ? 'light_mode' : 'dark_mode' }}</i>
+        <i class="material-symbols-rounded text-[18px]! text-white">{{ isDark() ? 'light_mode' : 'dark_mode' }}</i>
       </span>
       @if (!collapsed()) {
       <span class="flex-1 truncate text-left">{{ isDark() ? 'Tema claro' : 'Tema oscuro' }}</span>
