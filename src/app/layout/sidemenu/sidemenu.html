@@ -63,14 +63,17 @@
     [class.justify-center]="collapsed()">
     <div class="avatar avatar-placeholder shrink-0">
       <div class="bg-primary text-primary-content w-8 rounded-full">
-        <span class="text-[12.5px] font-bold">MT</span>
+        <span class="text-[12.5px] font-bold">{{ userInitials() }}</span>
       </div>
     </div>
     @if (!collapsed()) {
-    <div class="min-w-0">
-      <div class="text-[12.5px] font-bold text-secondary whitespace-nowrap">Mariana Torres</div>
-      <div class="text-[11px] text-secondary/60">Administradora</div>
+    <div class="min-w-0 flex-1">
+      <div class="text-[12.5px] font-bold text-secondary whitespace-nowrap truncate">{{ user()?.email }}</div>
+      <div class="text-[11px] text-secondary/60 capitalize">{{ user()?.role }}</div>
     </div>
+    <button type="button" (click)="logout()" class="tooltip tooltip-right shrink-0" data-tip="Cerrar sesión">
+      <i class="material-symbols-rounded text-secondary/60 hover:text-error text-[18px]!">logout</i>
+    </button>
     }
   </div>
 </aside>

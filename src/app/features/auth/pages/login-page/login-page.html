@@ -1,10 +1,11 @@
 <main class="relative min-h-screen w-full flex items-center justify-center overflow-hidden px-4 py-12">
 
   <div
-    class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--color-primary-content)_1px,transparent_0)] bg-size-[24px_24px] opacity-10">
+    class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--color-base-content)_1px,transparent_0)] bg-size-[24px_24px] opacity-10">
   </div>
 
-  <div #loginCard class="card relative bg-neutral text-neutral-content shadow-2xl w-full max-w-sm lg:max-w-4xl rounded-4xl lg:rounded-[3rem] overflow-hidden">
+  <div #loginCard
+    class="card relative bg-neutral text-neutral-content shadow-2xl w-full max-w-sm lg:max-w-4xl rounded-4xl lg:rounded-[3rem] overflow-hidden">
     <div class="lg:grid lg:grid-cols-2 lg:items-center">
 
       <!-- Form -->
@@ -16,7 +17,13 @@
 
         <form class="mt-8">
 
-          <fieldset class="fieldset gap-4">
+          @if (errorMessage()) {
+          <div class="alert alert-error alert-soft text-sm mb-4" role="alert">
+            <span>{{ errorMessage() }}</span>
+          </div>
+          }
+
+          <fieldset class="fieldset gap-4 [--color-base-100:var(--color-neutral)] [--color-base-content:var(--color-neutral-content)]">
 
             <label class="floating-label">
               <span>Correo electrónico</span>
@@ -48,10 +55,13 @@
 
             <a class="link link-primary text-sm self-end no-underline">Recuperar contraseña</a>
 
-            <button type="button" class="btn btn-primary rounded-full w-full mt-4"
-              /* [disabled]="loginForm().invalid()" */
-              (click)="goto()"
-              >Iniciar sesion</button>
+            <button type="button" class="btn btn-primary rounded-full w-full mt-4" [class.btn-disabled]="loading()" (click)="login()">
+              
+              @if (loading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              }
+              Iniciar sesión
+            </button>
           </div>
 
         </form>

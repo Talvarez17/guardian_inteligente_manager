@@ -1,5 +1,6 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 import { Theme } from '../../core/services/theme';
 import { SidemenuItemModel } from '../../core/models/sidemenu-item-model';
 
@@ -10,12 +11,21 @@ import { SidemenuItemModel } from '../../core/models/sidemenu-item-model';
 })
 export class Sidemenu {
   private readonly themeService = inject(Theme);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  readonly theme = this.themeService.current;
+  readonly user = this.auth.user;
 
   readonly closeMobile = output<void>();
 
   readonly collapsed = signal(false);
-  readonly theme = this.themeService.current;
+  
   readonly isDark = computed(() => this.theme() === 'pro-dark');
+  readonly userInitials = computed(() => {
+    const email = this.user()?.email ?? '';
+    return email.slice(0, 2).toUpperCase() || '--';
+  });
 
   readonly menuItems: SidemenuItemModel[] = [
     { key: 'dashboard', label: 'Dashboard', icon: 'home' },
@@ -36,5 +46,10 @@ export class Sidemenu {
 
   onNavigate(): void {
     this.closeMobile.emit();
+  }
+
+  logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
   }
 }

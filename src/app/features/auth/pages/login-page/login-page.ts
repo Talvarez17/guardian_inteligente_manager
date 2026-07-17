@@ -1,10 +1,13 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { FormField, apply, form } from '@angular/forms/signals';
+import { FormField, apply, form, submit } from '@angular/forms/signals';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LottieComponent, AnimationOptions } from 'ngx-lottie';
 import gsap from 'gsap';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 import { LoginModel } from '../../../../core/models/login-model';
 import { emailSchema, passwordSchema } from '../../../../shared/forms/field-schemas';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
@@ -13,6 +16,8 @@ import { Router } from '@angular/router';
 })
 export class LoginPage implements AfterViewInit {
 
+  private readonly auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   router = inject(Router);
 
   lottieOptions: AnimationOptions = {
@@ -21,7 +26,6 @@ export class LoginPage implements AfterViewInit {
 
   private loginCard = viewChild.required<ElementRef<HTMLElement>>('loginCard');
   private loginTitle = viewChild.required<ElementRef<HTMLElement>>('loginTitle');
-  private loginFormEl = viewChild.required<ElementRef<HTMLElement>>('loginFormEl');
   private loginImage = viewChild.required<ElementRef<HTMLElement>>('loginImage');
 
   loginModel = signal<LoginModel>({
@@ -33,6 +37,9 @@ export class LoginPage implements AfterViewInit {
     apply(f.email, emailSchema);
     apply(f.password, passwordSchema);
   });
+
+  loading = signal(false);
+  errorMessage = signal<string | null>(null);
 
 
   ngAfterViewInit(): void {
@@ -61,8 +68,40 @@ export class LoginPage implements AfterViewInit {
     }, '-=0.6');
   }
 
-  goto(){
-    this.router.navigate(['/dashboard']);
+  async login(): Promise<void> {
+
+    await submit(this.loginForm, async () => {
+
+      this.loading.set(true);
+      this.errorMessage.set(null);
+
+      try {
+        await firstValueFrom(this.auth.login(this.loginModel()));
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+        this.router.navigateByUrl(returnUrl);
+      } 
+      catch (error) {
+        this.errorMessage.set(this.resolveErrorMessage(error));
+      } 
+      finally {
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private resolveErrorMessage(error: unknown): string {
+
+    if (error instanceof HttpErrorResponse) {
+      const message = error.error?.message;
+      
+      if (Array.isArray(message)) {
+        return message[0];
+      }
+      if (typeof message === 'string') {
+        return message;
+      }
+    }
+    return 'Ocurrió un error al iniciar sesión. Intenta de nuevo.';
   }
 
 }
