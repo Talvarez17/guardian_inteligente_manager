@@ -22,9 +22,10 @@ export class Sidemenu {
   readonly collapsed = signal(false);
   
   readonly isDark = computed(() => this.theme() === 'pro-dark');
+
   readonly userInitials = computed(() => {
     const email = this.user()?.email ?? '';
-    return email.slice(0, 2).toUpperCase() || '--';
+    return email.slice(0, 1).toUpperCase() || '?';
   });
 
   readonly menuItems: SidemenuItemModel[] = [

@@ -1,11 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LottieComponent, AnimationOptions } from 'ngx-lottie';
 import gsap from 'gsap';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { Theme } from '../../../../core/services/theme';
 import { LoginModel } from '../../../../core/models/login-model';
 import { emailSchema, passwordSchema } from '../../../../shared/forms/field-schemas';
 
@@ -18,7 +19,10 @@ export class LoginPage implements AfterViewInit {
 
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly themeService = inject(Theme);
   router = inject(Router);
+
+  readonly isDark = computed(() => this.themeService.current() === 'pro-dark');
 
   lottieOptions: AnimationOptions = {
     path: '/animations/loginLottie.json',
@@ -26,7 +30,7 @@ export class LoginPage implements AfterViewInit {
 
   private loginCard = viewChild.required<ElementRef<HTMLElement>>('loginCard');
   private loginTitle = viewChild.required<ElementRef<HTMLElement>>('loginTitle');
-  private loginImage = viewChild.required<ElementRef<HTMLElement>>('loginImage');
+  private brandPanel = viewChild.required<ElementRef<HTMLElement>>('brandPanel');
 
   loginModel = signal<LoginModel>({
     email: '',
@@ -40,6 +44,7 @@ export class LoginPage implements AfterViewInit {
 
   loading = signal(false);
   errorMessage = signal<string | null>(null);
+  showPassword = signal(false);
 
 
   ngAfterViewInit(): void {
@@ -60,12 +65,25 @@ export class LoginPage implements AfterViewInit {
       ease: 'power2.out',
     }, '-=0.4');
 
-    tl.from(this.loginImage().nativeElement, {
+    tl.from(this.brandPanel().nativeElement, {
       x: 60,
       opacity: 0,
       duration: 1,
       ease: 'elastic.out(1, 0.6)',
     }, '-=0.6');
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update((value) => !value);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
+  }
+
+  onSubmit(event: Event): void {
+    event.preventDefault();
+    this.login();
   }
 
   async login(): Promise<void> {

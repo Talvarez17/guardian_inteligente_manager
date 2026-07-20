@@ -4,18 +4,51 @@
     class="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--color-base-content)_1px,transparent_0)] bg-size-[24px_24px] opacity-10">
   </div>
 
+  <button type="button" (click)="toggleTheme()"
+    class="btn btn-circle btn-sm absolute top-4 right-4 sm:top-6 sm:right-6 z-20 border-none bg-base-100 text-base-content shadow-md hover:bg-base-300"
+    [attr.aria-label]="isDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'">
+    <i class="material-symbols-rounded text-[18px]!">{{ isDark() ? 'light_mode' : 'dark_mode' }}</i>
+  </button>
+
   <div #loginCard
-    class="card relative bg-neutral text-neutral-content shadow-2xl w-full max-w-sm lg:max-w-4xl rounded-4xl lg:rounded-[3rem] overflow-hidden">
-    <div class="lg:grid lg:grid-cols-2 lg:items-center">
+    class="card relative bg-base-100 text-base-content shadow-2xl w-full max-w-sm lg:max-w-4xl rounded-4xl lg:rounded-[3rem] overflow-hidden">
+    <div class="lg:grid lg:grid-cols-2 lg:items-stretch">
 
-      <!-- Form -->
-      <div class="card-body lg:py-16 lg:px-14">
+      <!-- Brand panel -->
+      <div #brandPanel class="hidden lg:flex relative flex-col justify-between overflow-hidden p-10">
+        
+        <div class="absolute inset-0" style="background: linear-gradient(160deg, var(--color-secondary), oklch(0.34 0.2 245));"></div>
 
-        <div class="text-center">
-          <h2 #loginTitle class="mt-4 text-2xl lg:text-3xl font-bold tracking-tight">Iniciar sesión</h2>
+        <div class="pointer-events-none absolute -top-16 -right-16 size-64 rounded-full" style="background: radial-gradient(circle, oklch(0.78 0.15 195 / 0.2), transparent 70%);"></div>
+
+        <div class="relative z-10 flex flex-col items-center text-center">
+          <img src="/images/guardianinteligente.png" alt="Guardian Inteligente" class="h-20 w-auto" />
+          <div class="divider"></div>
+          <ng-lottie [options]="lottieOptions" width="100%" height="100%" containerClass="w-full max-w-xs" />
         </div>
 
-        <form class="mt-8">
+        <div class="relative z-10 text-center">
+          <h3 class="text-xl font-bold tracking-tight text-white">Gestión interna, en un solo panel.</h3>
+          <p class="mt-2 text-sm text-white/65">Gestion, cobranza y documentación en las misma plataforma.</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="card-body lg:py-14 lg:px-14">
+
+        <div class="lg:hidden flex items-center justify-center mb-2">
+          <div class="rounded-2xl px-4 py-2.5"
+            style="background: linear-gradient(160deg, var(--color-secondary), oklch(0.34 0.2 245));">
+            <img src="/images/guardianinteligente.png" alt="Guardian Inteligente" class="h-18 w-auto" />
+          </div>
+        </div>
+
+        <div class="text-center">
+          <h2 #loginTitle class="text-2xl lg:text-3xl font-bold tracking-tight">Iniciar sesión</h2>
+          <p class="mt-1 text-sm text-base-content/60">Ingresa tus credenciales para acceder a Guardián Inteligente</p>
+        </div>
+
+        <form class="mt-8" (submit)="onSubmit($event)">
 
           @if (errorMessage()) {
           <div class="alert alert-error alert-soft text-sm mb-4" role="alert">
@@ -23,54 +56,52 @@
           </div>
           }
 
-          <fieldset class="fieldset gap-4 [--color-base-100:var(--color-neutral)] [--color-base-content:var(--color-neutral-content)]">
+          <fieldset class="fieldset gap-4">
 
-            <label class="floating-label">
-              <span>Correo electrónico</span>
-              <input type="text" placeholder="usuario@guardian.com"
-                class="input input-ghost rounded-full border border-neutral-content/20 w-full"
-                [class.input-error]="loginForm.email().invalid() && loginForm.email().touched()"
-                [formField]="loginForm.email" />
-            </label>
+            <div>
+              <legend class="fieldset-legend">Correo electrónico</legend>
+              <label class="input rounded-full w-full"
+                [class.input-error]="loginForm.email().invalid() && loginForm.email().touched()">
+                <i class="material-symbols-rounded text-base-content/40 text-[18px]!">mail</i>
+                <input type="text" placeholder="nombre@empresa.com" class="grow" [formField]="loginForm.email" />
+              </label>
+              @if (loginForm.email().invalid() && loginForm.email().touched()) {
+              <p class="text-error text-xs mt-1">{{ loginForm.email().errors()[0].message }}</p>
+              }
+            </div>
 
-            @if (loginForm.email().invalid() && loginForm.email().touched()) {
-            <p class="text-error text-xs -mt-2">{{ loginForm.email().errors()[0].message }}</p>
-            }
-
-            <label class="floating-label">
-              <span>Contraseña</span>
-              <input type="password" placeholder="Contraseña"
-                class="input input-ghost rounded-full border border-neutral-content/20 w-full"
-                [class.input-error]="loginForm.password().invalid() && loginForm.password().touched()"
-                [formField]="loginForm.password" />
-            </label>
-
-            @if (loginForm.password().invalid() && loginForm.password().touched()) {
-            <p class="text-error text-xs -mt-2">{{ loginForm.password().errors()[0].message }}</p>
-            }
+            <div>
+              <legend class="fieldset-legend">Contraseña</legend>
+              <label class="input rounded-full w-full"
+                [class.input-error]="loginForm.password().invalid() && loginForm.password().touched()">
+                <i class="material-symbols-rounded text-base-content/40 text-[18px]!">lock</i>
+                <input [type]="showPassword() ? 'text' : 'password'" placeholder="Contraseña" class="grow"
+                  [formField]="loginForm.password" />
+                <button type="button" class="flex shrink-0 items-center justify-center text-base-content/40 hover:text-base-content"
+                  (click)="togglePasswordVisibility()">
+                  <i class="material-symbols-rounded text-[18px]!">{{ showPassword() ? 'visibility_off' : 'visibility'
+                    }}</i>
+                </button>
+              </label>
+              @if (loginForm.password().invalid() && loginForm.password().touched()) {
+              <p class="text-error text-xs mt-1">{{ loginForm.password().errors()[0].message }}</p>
+              }
+            </div>
 
           </fieldset>
 
-          <div class="mt-2 flex flex-col items-center lg:items-end justify-center">
-
-            <a class="link link-primary text-sm self-end no-underline">Recuperar contraseña</a>
-
-            <button type="button" class="btn btn-primary rounded-full w-full mt-4" [class.btn-disabled]="loading()" (click)="login()">
-              
-              @if (loading()) {
-                <span class="loading loading-spinner loading-sm"></span>
-              }
-              Iniciar sesión
-            </button>
+          <div class="mt-2 flex justify-end">
+            <a class="link link-primary text-sm no-underline">¿Olvidaste tu contraseña?</a>
           </div>
 
-        </form>
-      </div>
+          <button type="submit" class="btn btn-primary rounded-full w-full mt-6" [class.btn-disabled]="loading()">
+            @if (loading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+            }
+            Iniciar sesión
+          </button>
 
-      <!-- Illustration -->
-      <div #loginImage
-        class="hidden lg:flex items-center justify-center relative m-6 min-h-104 rounded-4xl overflow-hidden bg-linear-to-br from-primary to-secondary">
-        <ng-lottie [options]="lottieOptions" width="100%" height="100%" containerClass="w-full max-w-sm" />
+        </form>
       </div>
 
     </div>
