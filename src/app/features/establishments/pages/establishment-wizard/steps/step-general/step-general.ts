@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { EstablishmentService } from '../../../../services/establishment.service';
 import { EstablishmentCatalogsService } from '../../../../services/establishment-catalogs.service';
 import { DesignatedPerson, EstablishmentStatus, Plan, Turnover } from '../../../../models/establishment-model';
@@ -48,9 +49,9 @@ export class EstablishmentStepGeneral {
   readonly stateOptions = MEXICO_STATES.map((state) => state.name);
   readonly cityOptions = computed(() => getMunicipalitiesByState(this.coreModel().state));
 
-  readonly plans = signal<Plan[]>([]);
-  readonly turnovers = signal<Turnover[]>([]);
-  readonly designatedPersons = signal<DesignatedPerson[]>([]);
+  readonly plans = toSignal(this.catalogs.getPlans(), { initialValue: [] as Plan[] });
+  readonly turnovers = toSignal(this.catalogs.getTurnovers(), { initialValue: [] as Turnover[] });
+  readonly designatedPersons = toSignal(this.catalogs.getDesignatedPersons(), { initialValue: [] as DesignatedPerson[] });
 
   readonly coreModel = signal<CoreModel>(emptyCoreModel());
   readonly coreForm = form(this.coreModel, (f) => {
@@ -79,36 +80,32 @@ export class EstablishmentStepGeneral {
     }
   });
 
-  private readonly loadExisting = effect(() => {
-    const id = this.establishmentId();
-    if (!id) return;
-
-    this.establishmentService.findOne(id).subscribe((establishment) => {
-      this.coreModel.set({
-        name: establishment.name,
-        business_name: establishment.business_name,
-        rfc: establishment.rfc,
-        turnover_id: establishment.turnover.id,
-        street: establishment.street,
-        neighborhood: establishment.neighborhood,
-        ext_number: establishment.ext_number,
-        int_number: establishment.int_number ?? '',
-        postal_code: establishment.postal_code,
-        state: establishment.state,
-        city: establishment.city,
-        designated_person_id: establishment.designated_person.id,
-        plan_id: establishment.plan.id,
-        establishment_status: establishment.establishment_status,
-        comment: establishment.comment ?? '',
-      });
-    });
+  private readonly existingEstablishmentResource = rxResource({
+    params: () => this.establishmentId() ?? undefined,
+    stream: ({ params }) => this.establishmentService.findOne(params).pipe(catchError(() => of(null))),
   });
 
-  constructor() {
-    this.catalogs.getPlans().subscribe((plans) => this.plans.set(plans));
-    this.catalogs.getTurnovers().subscribe((turnovers) => this.turnovers.set(turnovers));
-    this.catalogs.getDesignatedPersons().subscribe((persons) => this.designatedPersons.set(persons));
-  }
+  private readonly syncCoreModel = effect(() => {
+    const establishment = this.existingEstablishmentResource.value();
+    if (!establishment) return;
+    this.coreModel.set({
+      name: establishment.name,
+      business_name: establishment.business_name,
+      rfc: establishment.rfc,
+      turnover_id: establishment.turnover.id,
+      street: establishment.street,
+      neighborhood: establishment.neighborhood,
+      ext_number: establishment.ext_number,
+      int_number: establishment.int_number ?? '',
+      postal_code: establishment.postal_code,
+      state: establishment.state,
+      city: establishment.city,
+      designated_person_id: establishment.designated_person.id,
+      plan_id: establishment.plan.id,
+      establishment_status: establishment.establishment_status,
+      comment: establishment.comment ?? '',
+    });
+  });
 
   onTurnoverChange(event: Event): void {
     const value = Number((event.target as HTMLSelectElement).value);

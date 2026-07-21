@@ -1,4 +1,5 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { catchError, firstValueFrom, of } from 'rxjs';
 import { EstablishmentContactService } from '../../../../services/establishment-contact.service';
@@ -25,7 +26,7 @@ export class EstablishmentStepContact {
   readonly saved = output<void>();
   readonly back = output<void>();
 
-  readonly clientRoles = signal<ClientRole[]>([]);
+  readonly clientRoles = toSignal(this.catalogs.getClientRoles(), { initialValue: [] as ClientRole[] });
 
   readonly contactModel = signal<ContactModel>(emptyContactModel());
   readonly contactForm = form(this.contactModel, (f) => {
@@ -37,27 +38,21 @@ export class EstablishmentStepContact {
   readonly savingContact = signal(false);
   readonly contactError = signal<string | null>(null);
 
-  private readonly loadExisting = effect(() => {
-    const id = this.establishmentId();
-    if (!id) return;
-
-    this.contactService
-      .findByEstablishment(id)
-      .pipe(catchError(() => of(null)))
-      .subscribe((contact) => {
-        if (!contact) return;
-        this.contactModel.set({
-          contact_role_id: contact.contact_role.id,
-          contact_name: contact.contact_name,
-          contact_number: contact.contact_number,
-          contact_email: contact.contact_email,
-        });
-      });
+  private readonly existingContactResource = rxResource({
+    params: () => this.establishmentId() ?? undefined,
+    stream: ({ params }) => this.contactService.findByEstablishment(params).pipe(catchError(() => of(null))),
   });
 
-  constructor() {
-    this.catalogs.getClientRoles().subscribe((roles) => this.clientRoles.set(roles));
-  }
+  private readonly syncContactModel = effect(() => {
+    const contact = this.existingContactResource.value();
+    if (!contact) return;
+    this.contactModel.set({
+      contact_role_id: contact.contact_role.id,
+      contact_name: contact.contact_name,
+      contact_number: contact.contact_number,
+      contact_email: contact.contact_email,
+    });
+  });
 
   onContactRoleChange(event: Event): void {
     const value = Number((event.target as HTMLSelectElement).value);

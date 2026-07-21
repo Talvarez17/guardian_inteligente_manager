@@ -1,11 +1,12 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, ElementRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, signal, viewChild } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { FormField, apply, form } from '@angular/forms/signals';
+import { FormField, apply, form, submit } from '@angular/forms/signals';
+import { catchError, firstValueFrom, map, of } from 'rxjs';
 
 import { CatalogAdapter, CatalogItem, ItemFormModel } from '../../models/catalog-crud-model';
-import { PaginationMeta } from '../../../../core/models/pagination-model';
 import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
+import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
 const SEARCH_DEBOUNCE_MS = 350;
 // Compact mode fetches the whole catalog (no server-side pagination) to compute accurate
@@ -24,17 +25,44 @@ export class CatalogCrud {
   readonly mode = input<'compact' | 'full'>('compact');
   readonly viewAllRoute = input<string | null>(null);
 
-  readonly items = signal<CatalogItem[]>([]);
-  readonly meta = signal<PaginationMeta | null>(null);
-  readonly loading = signal(false);
-  readonly loadError = signal<string | null>(null);
-
-  readonly activeCount = computed(() => this.items().filter((item) => item.status).length);
-  readonly inactiveCount = computed(() => this.items().length - this.activeCount());
-
   readonly search = signal('');
   readonly page = signal(1);
   private searchDebounceHandle?: ReturnType<typeof setTimeout>;
+
+  private readonly listResource = rxResource({
+    params: () => ({
+      adapter: this.adapter(),
+      mode: this.mode(),
+      page: this.page(),
+      search: this.mode() === 'full' ? this.search() : '',
+    }),
+    stream: ({ params }) => {
+      const limit = params.mode === 'full' ? FULL_PAGE_SIZE : SUMMARY_FETCH_LIMIT;
+      return params.adapter
+        .findAll({ page: params.page, limit, search: params.mode === 'full' ? params.search || undefined : undefined })
+        .pipe(
+          map((response) => ({ ok: true as const, response })),
+          catchError(() => of({ ok: false as const })),
+        );
+    },
+  });
+
+  readonly items = computed<CatalogItem[]>(() => {
+    const result = this.listResource.value();
+    return result?.ok ? result.response.data : [];
+  });
+  readonly meta = computed(() => {
+    const result = this.listResource.value();
+    return result?.ok ? result.response.meta : null;
+  });
+  readonly loading = computed(() => this.listResource.isLoading());
+  readonly loadError = computed(() => {
+    const result = this.listResource.value();
+    return result && !result.ok ? 'No se pudo cargar la información.' : null;
+  });
+
+  readonly activeCount = computed(() => this.items().filter((item) => item.status).length);
+  readonly inactiveCount = computed(() => this.items().length - this.activeCount());
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
 
@@ -48,37 +76,6 @@ export class CatalogCrud {
     apply(f.name, requiredTextSchema);
   });
 
-  private loadedAdapterKey: string | null = null;
-
-  private readonly loadOnAdapterReady = effect(() => {
-    const currentAdapter = this.adapter();
-    if (currentAdapter && currentAdapter.key !== this.loadedAdapterKey) {
-      this.loadedAdapterKey = currentAdapter.key;
-      this.fetch();
-    }
-  });
-
-  private fetch(): void {
-    this.loading.set(true);
-    this.loadError.set(null);
-
-    const limit = this.mode() === 'full' ? FULL_PAGE_SIZE : SUMMARY_FETCH_LIMIT;
-
-    this.adapter()
-      .findAll({ page: this.page(), limit, search: this.mode() === 'full' ? this.search() || undefined : undefined })
-      .subscribe({
-        next: (response) => {
-          this.items.set(response.data);
-          this.meta.set(response.meta);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.loadError.set('No se pudo cargar la información.');
-          this.loading.set(false);
-        },
-      });
-  }
-
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.search.set(value);
@@ -86,7 +83,6 @@ export class CatalogCrud {
     clearTimeout(this.searchDebounceHandle);
     this.searchDebounceHandle = setTimeout(() => {
       this.page.set(1);
-      this.fetch();
     }, SEARCH_DEBOUNCE_MS);
   }
 
@@ -94,7 +90,6 @@ export class CatalogCrud {
     const meta = this.meta();
     if (page < 1 || (meta && page > meta.totalPages)) return;
     this.page.set(page);
-    this.fetch();
   }
 
   openCreate(): void {
@@ -115,43 +110,39 @@ export class CatalogCrud {
     this.dialogRef().nativeElement.close();
   }
 
-  save(): void {
-    if (this.itemForm().invalid()) {
-      this.itemForm().markAsTouched();
-      return;
-    }
+  async save(): Promise<void> {
+    await submit(this.itemForm, async () => {
+      this.saving.set(true);
+      this.formError.set(null);
 
-    this.saving.set(true);
-    this.formError.set(null);
+      const name = this.itemModel().name;
+      const editingId = this.editingId();
 
-    const name = this.itemModel().name;
-    const editingId = this.editingId();
-    const request$ = editingId ? this.adapter().update(editingId, { name }) : this.adapter().create(name);
-
-    request$.subscribe({
-      next: () => {
-        this.saving.set(false);
+      try {
+        if (editingId) {
+          await firstValueFrom(this.adapter().update(editingId, { name }));
+        } else {
+          await firstValueFrom(this.adapter().create(name));
+        }
         this.closeDialog();
-        this.fetch();
-      },
-      error: (error: HttpErrorResponse) => {
+        this.listResource.reload();
+      } catch (error) {
+        this.formError.set(resolveErrorMessage(error, 'No se pudo guardar el registro.'));
+      } finally {
         this.saving.set(false);
-        const message = error.error?.message;
-        this.formError.set(Array.isArray(message) ? message.join(', ') : message ?? 'No se pudo guardar el registro.');
-      },
+      }
     });
   }
 
-  toggleStatus(item: CatalogItem): void {
+  async toggleStatus(item: CatalogItem): Promise<void> {
     this.togglingId.set(item.id);
-    this.adapter()
-      .update(item.id, { status: !item.status })
-      .subscribe({
-        next: () => {
-          this.togglingId.set(null);
-          this.fetch();
-        },
-        error: () => this.togglingId.set(null),
-      });
+    try {
+      await firstValueFrom(this.adapter().update(item.id, { status: !item.status }));
+      this.listResource.reload();
+    } catch {
+      // Silencioso: igual que antes, el usuario ve que togglingId vuelve a null sin cambio de estado.
+    } finally {
+      this.togglingId.set(null);
+    }
   }
 }

@@ -1,9 +1,10 @@
 import { Component, ElementRef, inject, output, signal, viewChild } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom, map } from 'rxjs';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { PlanFormValue, PlanModel } from '../../models/plan-model';
 import { PLAN_FREQUENCY_OPTIONS } from '../../models/plan-options';
-import { PlansService } from '../../services/plans-service';
+import { PlansService } from '../../services/plans.service';
 import { PlanFeatureCatalogService } from '../../../management/services/plan-feature-catalog.service';
 import { CatalogItem } from '../../../management/models/catalog-crud-model';
 import { positiveNumberSchema, requiredTextSchema } from '../../../../shared/forms/field-schemas';
@@ -19,13 +20,15 @@ function emptyModel(): PlanFormValue {
   templateUrl: './plan-form-modal.html',
 })
 export class PlanFormModal {
-  private readonly store = inject(PlansService);
+  private readonly plansService = inject(PlansService);
   private readonly featureCatalogService = inject(PlanFeatureCatalogService);
 
   readonly saved = output<void>();
 
   readonly frequencyOptions = PLAN_FREQUENCY_OPTIONS;
-  readonly featureCatalog = signal<CatalogItem[]>([]);
+  readonly featureCatalog = toSignal(this.featureCatalogService.findAll({}).pipe(map((response) => response.data)), {
+    initialValue: [] as CatalogItem[],
+  });
   readonly selectedFeatureIds = signal<number[]>([]);
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
@@ -41,10 +44,6 @@ export class PlanFormModal {
     apply(f.trial, positiveNumberSchema);
     apply(f.tries, positiveNumberSchema);
   });
-
-  constructor() {
-    this.featureCatalogService.findAll({}).subscribe((response) => this.featureCatalog.set(response.data));
-  }
 
   open(plan?: PlanModel): void {
     this.errorMessage.set(null);
@@ -92,7 +91,7 @@ export class PlanFormModal {
 
         if (editingId) {
           await firstValueFrom(
-            this.store.update(editingId, {
+            this.plansService.update(editingId, {
               name: value.name,
               trial: value.trial,
               comments: value.comments,
@@ -101,7 +100,7 @@ export class PlanFormModal {
           );
         } else {
           await firstValueFrom(
-            this.store.create({
+            this.plansService.create({
               name: value.name,
               amount: value.amount,
               currency: 'MXN',

@@ -1,7 +1,9 @@
-import { Component, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { PlanModel } from '../../models/plan-model';
-import { PlansService } from '../../services/plans-service';
+import { PlansService } from '../../services/plans.service';
 import { PlanFormModal } from '../../components/plan-form-modal/plan-form-modal';
 import { PlanFeatureCatalogService } from '../../../management/services/plan-feature-catalog.service';
 import { CatalogItem } from '../../../management/models/catalog-crud-model';
@@ -21,41 +23,37 @@ const CARD_GRADIENTS = [
   templateUrl: './plans.html',
 })
 export class Plans {
-  private readonly store = inject(PlansService);
+  private readonly plansService = inject(PlansService);
   private readonly featureCatalogService = inject(PlanFeatureCatalogService);
 
-  readonly plans = signal<PlanModel[]>([]);
-  readonly featureCatalog = signal<CatalogItem[]>([]);
-  readonly loading = signal(false);
-  readonly loadError = signal<string | null>(null);
+  readonly featureCatalog = toSignal(this.featureCatalogService.findAll({}).pipe(map((response) => response.data)), {
+    initialValue: [] as CatalogItem[],
+  });
   readonly togglingId = signal<number | null>(null);
 
   readonly modal = viewChild.required(PlanFormModal);
 
-  constructor() {
-    this.fetch();
-    this.featureCatalogService.findAll({}).subscribe((response) => this.featureCatalog.set(response.data));
-  }
+  private readonly plansResource = rxResource({
+    stream: () =>
+      this.plansService.findAll().pipe(
+        map((plans) => ({ ok: true as const, plans })),
+        catchError(() => of({ ok: false as const })),
+      ),
+  });
+
+  readonly plans = computed<PlanModel[]>(() => {
+    const result = this.plansResource.value();
+    return result?.ok ? result.plans : [];
+  });
+  readonly loading = computed(() => this.plansResource.isLoading());
+  readonly loadError = computed(() => {
+    const result = this.plansResource.value();
+    return result && !result.ok ? 'No se pudieron cargar los planes.' : null;
+  });
 
   featureRows(plan: PlanModel): { name: string; included: boolean }[] {
     const includedIds = new Set(plan.features.map((feature) => feature.id));
     return this.featureCatalog().map((feature) => ({ name: feature.name, included: includedIds.has(feature.id) }));
-  }
-
-  private fetch(): void {
-    this.loading.set(true);
-    this.loadError.set(null);
-
-    this.store.findAll().subscribe({
-      next: (plans) => {
-        this.plans.set(plans);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loadError.set('No se pudieron cargar los planes.');
-        this.loading.set(false);
-      },
-    });
   }
 
   openCreate(): void {
@@ -67,18 +65,19 @@ export class Plans {
   }
 
   onSaved(): void {
-    this.fetch();
+    this.plansResource.reload();
   }
 
-  toggleStatus(plan: PlanModel): void {
+  async toggleStatus(plan: PlanModel): Promise<void> {
     this.togglingId.set(plan.id);
-    this.store.update(plan.id, { status: !plan.status }).subscribe({
-      next: () => {
-        this.togglingId.set(null);
-        this.fetch();
-      },
-      error: () => this.togglingId.set(null),
-    });
+    try {
+      await firstValueFrom(this.plansService.update(plan.id, { status: !plan.status }));
+      this.plansResource.reload();
+    } catch {
+      // Silencioso: igual que antes, el usuario ve que togglingId vuelve a null sin cambio de estado.
+    } finally {
+      this.togglingId.set(null);
+    }
   }
 
   ivaOf(amount: number): number {

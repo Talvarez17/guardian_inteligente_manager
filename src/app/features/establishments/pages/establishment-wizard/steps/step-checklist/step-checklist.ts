@@ -1,5 +1,6 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { EstablishmentChecklistService } from '../../../../services/establishment-checklist.service';
 import { EstablishmentChecklistEntry } from '../../../../models/establishment-checklist-model';
 import { ChecklistRowState } from '../../../../models/establishment-wizard-model';
@@ -18,29 +19,27 @@ export class EstablishmentStepChecklist {
   readonly finish = output<void>();
 
   readonly checklistRows = signal<ChecklistRowState[]>([]);
-  readonly loadingChecklist = signal(false);
 
-  private readonly loadExisting = effect(() => {
-    const id = this.establishmentId();
-    if (!id) return;
+  private readonly existingChecklistResource = rxResource({
+    params: () => this.establishmentId() ?? undefined,
+    defaultValue: [] as EstablishmentChecklistEntry[],
+    stream: ({ params }) =>
+      this.checklistService.findChecklist(params).pipe(catchError(() => of([] as EstablishmentChecklistEntry[]))),
+  });
+  readonly loadingChecklist = computed(() => this.existingChecklistResource.isLoading());
 
-    this.loadingChecklist.set(true);
-    this.checklistService.findChecklist(id).subscribe({
-      next: (entries: EstablishmentChecklistEntry[]) => {
-        this.checklistRows.set(
-          entries.map((entry) => ({
-            item_type: entry.item_type,
-            completed: entry.completed,
-            document_url: entry.document_url,
-            file: null,
-            saving: false,
-            error: null,
-          })),
-        );
-        this.loadingChecklist.set(false);
-      },
-      error: () => this.loadingChecklist.set(false),
-    });
+  private readonly syncChecklistRows = effect(() => {
+    const entries = this.existingChecklistResource.value();
+    this.checklistRows.set(
+      entries.map((entry) => ({
+        item_type: entry.item_type,
+        completed: entry.completed,
+        document_url: entry.document_url,
+        file: null,
+        saving: false,
+        error: null,
+      })),
+    );
   });
 
   onChecklistFileSelected(row: ChecklistRowState, event: Event): void {

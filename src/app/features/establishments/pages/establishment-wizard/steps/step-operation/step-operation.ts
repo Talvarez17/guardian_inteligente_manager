@@ -1,4 +1,5 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { catchError, firstValueFrom, of } from 'rxjs';
 import { EstablishmentOperationService } from '../../../../services/establishment-operation.service';
@@ -46,28 +47,26 @@ export class EstablishmentStepOperation {
   readonly savingOperation = signal(false);
   readonly operationError = signal<string | null>(null);
 
-  private readonly loadExisting = effect(() => {
-    const id = this.establishmentId();
-    if (!id) return;
+  private readonly existingOperationResource = rxResource({
+    params: () => this.establishmentId() ?? undefined,
+    stream: ({ params }) => this.operationService.findByEstablishment(params).pipe(catchError(() => of(null))),
+  });
 
-    this.operationService
-      .findByEstablishment(id)
-      .pipe(catchError(() => of(null)))
-      .subscribe((operation) => {
-        if (!operation) return;
-        this.operationModel.set({
-          risk: operation.risk,
-          risk_factor: operation.risk_factor ?? '',
-          gia: operation.gia,
-          covia: operation.covia,
-          ria: operation.ria,
-          inactive_factor: operation.inactive_factor ?? '',
-          cameras: operation.cameras,
-          closing_date: operation.closing_date ? String(operation.closing_date).slice(0, 10) : '',
-          install_date: operation.install_date ? String(operation.install_date).slice(0, 10) : '',
-          real_install_date: operation.real_install_date ? String(operation.real_install_date).slice(0, 10) : '',
-        });
-      });
+  private readonly syncOperationModel = effect(() => {
+    const operation = this.existingOperationResource.value();
+    if (!operation) return;
+    this.operationModel.set({
+      risk: operation.risk,
+      risk_factor: operation.risk_factor ?? '',
+      gia: operation.gia,
+      covia: operation.covia,
+      ria: operation.ria,
+      inactive_factor: operation.inactive_factor ?? '',
+      cameras: operation.cameras,
+      closing_date: operation.closing_date ? String(operation.closing_date).slice(0, 10) : '',
+      install_date: operation.install_date ? String(operation.install_date).slice(0, 10) : '',
+      real_install_date: operation.real_install_date ? String(operation.real_install_date).slice(0, 10) : '',
+    });
   });
 
   async save(): Promise<void> {
