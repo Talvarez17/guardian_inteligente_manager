@@ -1,23 +1,16 @@
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { FormField, apply, form } from '@angular/forms/signals';
-import { PlanModel } from '../../models/plan-model';
-import { PLAN_FEATURE_CATALOG, PLAN_REPEAT_UNIT_OPTIONS } from '../../models/plan-options';
-import { PlansStore } from '../../services/plans-store';
+import { Component, ElementRef, inject, output, signal, viewChild } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { FormField, apply, form, submit } from '@angular/forms/signals';
+import { PlanFormValue, PlanModel } from '../../models/plan-model';
+import { PLAN_FREQUENCY_OPTIONS } from '../../models/plan-options';
+import { PlansService } from '../../services/plans-service';
+import { PlanFeatureCatalogService } from '../../../management/services/plan-feature-catalog.service';
+import { CatalogItem } from '../../../management/models/catalog-crud-model';
 import { positiveNumberSchema, requiredTextSchema } from '../../../../shared/forms/field-schemas';
+import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
-type PlanFormModel = Omit<PlanModel, 'id'>;
-
-function emptyModel(): PlanFormModel {
-  return {
-    name: '',
-    amount: 0,
-    repeatEvery: 1,
-    repeatUnit: 'Mensual',
-    trialDays: 0,
-    retryAttempts: 3,
-    notes: '',
-    features: PLAN_FEATURE_CATALOG.map((label) => ({ label, included: false })),
-  };
+function emptyModel(): PlanFormValue {
+  return { name: '', amount: 0, frequency: 'Mensual', trial: 0, tries: 3, comments: '' };
 }
 
 @Component({
@@ -26,33 +19,53 @@ function emptyModel(): PlanFormModel {
   templateUrl: './plan-form-modal.html',
 })
 export class PlanFormModal {
-  private readonly store = inject(PlansStore);
+  private readonly store = inject(PlansService);
+  private readonly featureCatalogService = inject(PlanFeatureCatalogService);
 
-  readonly repeatUnitOptions = PLAN_REPEAT_UNIT_OPTIONS;
-  readonly featureCatalog = PLAN_FEATURE_CATALOG;
+  readonly saved = output<void>();
+
+  readonly frequencyOptions = PLAN_FREQUENCY_OPTIONS;
+  readonly featureCatalog = signal<CatalogItem[]>([]);
+  readonly selectedFeatureIds = signal<number[]>([]);
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
 
-  readonly editingId = signal<string | null>(null);
-  readonly model = signal<PlanFormModel>(emptyModel());
+  readonly editingId = signal<number | null>(null);
+  readonly model = signal<PlanFormValue>(emptyModel());
+  readonly saving = signal(false);
+  readonly errorMessage = signal<string | null>(null);
 
   readonly planForm = form(this.model, (f) => {
     apply(f.name, requiredTextSchema);
     apply(f.amount, positiveNumberSchema);
-    apply(f.repeatEvery, positiveNumberSchema);
-    apply(f.trialDays, positiveNumberSchema);
-    apply(f.retryAttempts, positiveNumberSchema);
+    apply(f.trial, positiveNumberSchema);
+    apply(f.tries, positiveNumberSchema);
   });
 
+  constructor() {
+    this.featureCatalogService.findAll({}).subscribe((response) => this.featureCatalog.set(response.data));
+  }
+
   open(plan?: PlanModel): void {
+    this.errorMessage.set(null);
+
     if (plan) {
-      const { id, ...rest } = plan;
-      this.editingId.set(id);
-      this.model.set(rest);
+      this.editingId.set(plan.id);
+      this.model.set({
+        name: plan.name,
+        amount: plan.amount,
+        frequency: plan.frequency,
+        trial: plan.trial,
+        tries: plan.tries,
+        comments: plan.comments,
+      });
+      this.selectedFeatureIds.set(plan.features.map((feature) => feature.id));
     } else {
       this.editingId.set(null);
       this.model.set(emptyModel());
+      this.selectedFeatureIds.set([]);
     }
+
     this.dialogRef().nativeElement.showModal();
   }
 
@@ -60,31 +73,54 @@ export class PlanFormModal {
     this.dialogRef().nativeElement.close();
   }
 
-  isFeatureIncluded(label: string): boolean {
-    return this.model().features.find((feature) => feature.label === label)?.included ?? false;
+  isFeatureIncluded(id: number): boolean {
+    return this.selectedFeatureIds().includes(id);
   }
 
-  toggleFeature(label: string): void {
-    this.model.update((current) => ({
-      ...current,
-      features: current.features.map((feature) =>
-        feature.label === label ? { ...feature, included: !feature.included } : feature,
-      ),
-    }));
+  toggleFeature(id: number): void {
+    this.selectedFeatureIds.update((ids) => (ids.includes(id) ? ids.filter((existing) => existing !== id) : [...ids, id]));
   }
 
-  save(): void {
-    if (this.planForm().invalid()) {
-      this.planForm().markAsTouched();
-      return;
-    }
+  async save(): Promise<void> {
+    await submit(this.planForm, async () => {
+      this.saving.set(true);
+      this.errorMessage.set(null);
 
-    const editingId = this.editingId();
-    if (editingId) {
-      this.store.update(editingId, this.model());
-    } else {
-      this.store.add({ id: crypto.randomUUID(), ...this.model() });
-    }
-    this.close();
+      try {
+        const value = this.model();
+        const editingId = this.editingId();
+
+        if (editingId) {
+          await firstValueFrom(
+            this.store.update(editingId, {
+              name: value.name,
+              trial: value.trial,
+              comments: value.comments,
+              featureIds: this.selectedFeatureIds(),
+            }),
+          );
+        } else {
+          await firstValueFrom(
+            this.store.create({
+              name: value.name,
+              amount: value.amount,
+              currency: 'MXN',
+              frequency: value.frequency,
+              trial: value.trial,
+              tries: value.tries,
+              comments: value.comments,
+              featureIds: this.selectedFeatureIds(),
+            }),
+          );
+        }
+
+        this.saved.emit();
+        this.close();
+      } catch (error) {
+        this.errorMessage.set(resolveErrorMessage(error, 'No se pudo guardar el plan.'));
+      } finally {
+        this.saving.set(false);
+      }
+    });
   }
 }

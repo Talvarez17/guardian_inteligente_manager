@@ -7,6 +7,12 @@
     </p>
     }
 
+    @if (errorMessage()) {
+    <div class="alert alert-error mt-3 py-2 text-sm">
+      <span>{{ errorMessage() }}</span>
+    </div>
+    }
+
     <div class="flex flex-col gap-4 mt-4">
       <label class="fieldset">
         <span class="label text-xs">Nombre del plan</span>
@@ -19,9 +25,9 @@
       @if (editingId()) {
       <label class="fieldset">
         <span class="label text-xs">Días de prueba</span>
-        <input type="number" class="input w-full" [formField]="planForm.trialDays" />
-        @if (planForm.trialDays().invalid() && planForm.trialDays().touched()) {
-        <p class="text-error text-xs mt-1">{{ planForm.trialDays().errors()[0].message }}</p>
+        <input type="number" class="input w-full" [formField]="planForm.trial" />
+        @if (planForm.trial().invalid() && planForm.trial().touched()) {
+        <p class="text-error text-xs mt-1">{{ planForm.trial().errors()[0].message }}</p>
         }
       </label>
       } @else {
@@ -36,34 +42,26 @@
 
         <label class="fieldset">
           <span class="label text-xs">Frecuencia de cobro</span>
-          <input type="number" class="input w-full" [formField]="planForm.repeatEvery" />
-          @if (planForm.repeatEvery().invalid() && planForm.repeatEvery().touched()) {
-          <p class="text-error text-xs mt-1">{{ planForm.repeatEvery().errors()[0].message }}</p>
-          }
-        </label>
-
-        <label class="fieldset">
-          <span class="label text-xs">Unidad de frecuencia</span>
-          <select class="select w-full" [formField]="planForm.repeatUnit">
-            @for (unit of repeatUnitOptions; track unit) {
-            <option [value]="unit">{{ unit }}</option>
+          <select class="select w-full" [formField]="planForm.frequency">
+            @for (option of frequencyOptions; track option) {
+            <option [value]="option">{{ option }}</option>
             }
           </select>
         </label>
 
         <label class="fieldset">
           <span class="label text-xs">Días de prueba</span>
-          <input type="number" class="input w-full" [formField]="planForm.trialDays" />
-          @if (planForm.trialDays().invalid() && planForm.trialDays().touched()) {
-          <p class="text-error text-xs mt-1">{{ planForm.trialDays().errors()[0].message }}</p>
+          <input type="number" class="input w-full" [formField]="planForm.trial" />
+          @if (planForm.trial().invalid() && planForm.trial().touched()) {
+          <p class="text-error text-xs mt-1">{{ planForm.trial().errors()[0].message }}</p>
           }
         </label>
 
         <label class="fieldset">
           <span class="label text-xs">Intentos de cobro</span>
-          <input type="number" class="input w-full" [formField]="planForm.retryAttempts" />
-          @if (planForm.retryAttempts().invalid() && planForm.retryAttempts().touched()) {
-          <p class="text-error text-xs mt-1">{{ planForm.retryAttempts().errors()[0].message }}</p>
+          <input type="number" class="input w-full" [formField]="planForm.tries" />
+          @if (planForm.tries().invalid() && planForm.tries().touched()) {
+          <p class="text-error text-xs mt-1">{{ planForm.tries().errors()[0].message }}</p>
           }
         </label>
       </div>
@@ -71,17 +69,17 @@
 
       <label class="fieldset">
         <span class="label text-xs">Observaciones</span>
-        <textarea class="textarea w-full" rows="2" [formField]="planForm.notes"></textarea>
+        <textarea class="textarea w-full" rows="2" [formField]="planForm.comments"></textarea>
       </label>
 
       <div class="fieldset">
         <span class="label text-xs">Características incluidas</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          @for (feature of featureCatalog; track feature) {
+          @for (feature of featureCatalog(); track feature.id) {
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" class="toggle toggle-primary toggle-sm" [checked]="isFeatureIncluded(feature)"
-              (change)="toggleFeature(feature)" />
-            <span class="text-sm text-base-content">{{ feature }}</span>
+            <input type="checkbox" class="toggle toggle-primary toggle-sm" [checked]="isFeatureIncluded(feature.id)"
+              (change)="toggleFeature(feature.id)" />
+            <span class="text-sm text-base-content">{{ feature.name }}</span>
           </label>
           }
         </div>
@@ -89,8 +87,13 @@
     </div>
 
     <div class="modal-action">
-      <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
-      <button type="button" class="btn btn-primary" (click)="save()">Guardar</button>
+      <button type="button" class="btn btn-ghost" [disabled]="saving()" (click)="close()">Cancelar</button>
+      <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+        @if (saving()) {
+        <span class="loading loading-spinner loading-xs"></span>
+        }
+        Guardar
+      </button>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop">

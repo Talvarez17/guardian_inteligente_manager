@@ -9,21 +9,33 @@
   </button>
 </section>
 
+@if (loadError()) {
+<div class="alert alert-error mt-4">
+  <span>{{ loadError() }}</span>
+</div>
+}
+
+@if (loading()) {
+<div class="flex justify-center py-10">
+  <span class="loading loading-spinner loading-lg"></span>
+</div>
+} @else {
 <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-5">
   @for (item of plans(); track item.id; let i = $index) {
-  <div class="card bg-base-100 shadow-sm overflow-hidden">
+  <div class="card bg-base-100 shadow-sm overflow-hidden" [class.opacity-50]="!item.status">
     <div class="relative p-5 text-white bg-linear-to-br" [class]="cardGradient(i)">
-      <div class="absolute top-3 right-3 flex gap-1">
+      <div class="absolute top-3 right-3 flex items-center gap-2">
+        <div class="tooltip tooltip-left" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
+          <input type="checkbox" class="toggle toggle-sm" [checked]="item.status" [disabled]="togglingId() === item.id"
+            (change)="toggleStatus(item)" />
+        </div>
         <button type="button" class="btn btn-circle btn-ghost btn-xs text-white hover:bg-white/20" (click)="openEdit(item)">
           <i class="material-symbols-rounded text-[16px]!">edit</i>
-        </button>
-        <button type="button" class="btn btn-circle btn-ghost btn-xs text-white hover:bg-white/20" (click)="removePlan(item)">
-          <i class="material-symbols-rounded text-[16px]!">delete</i>
         </button>
       </div>
       <h2 class="text-xl font-bold">{{ item.name }}</h2>
       <p class="text-3xl font-extrabold mt-1">${{ item.amount | number: '1.2-2' }}</p>
-      <p class="text-xs opacity-80">Precio base mensual</p>
+      <p class="text-xs opacity-80">Precio base {{ item.frequency }}</p>
     </div>
 
     <div class="card-body gap-2 text-sm p-5">
@@ -39,12 +51,12 @@
       <div class="divider my-1"></div>
 
       <ul class="flex flex-col gap-1.5">
-        @for (feature of item.features; track feature.label) {
+        @for (feature of featureRows(item); track feature.name) {
         <li class="flex items-center gap-2 text-xs" [class.text-base-content/40]="!feature.included">
           <i class="material-symbols-rounded text-[16px]!" [class.text-success]="feature.included" [class.text-error]="!feature.included">
             {{ feature.included ? 'check_circle' : 'cancel' }}
           </i>
-          {{ feature.label }}
+          {{ feature.name }}
         </li>
         }
       </ul>
@@ -82,5 +94,6 @@
     </div>
   </div>
 </section>
+}
 
-<app-plan-form-modal />
+<app-plan-form-modal (saved)="onSaved()" />

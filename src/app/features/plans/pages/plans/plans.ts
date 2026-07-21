@@ -1,8 +1,10 @@
-import { Component, computed, inject, viewChild } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { PlanModel } from '../../models/plan-model';
-import { PlansStore } from '../../services/plans-store';
+import { PlansService } from '../../services/plans-service';
 import { PlanFormModal } from '../../components/plan-form-modal/plan-form-modal';
+import { PlanFeatureCatalogService } from '../../../management/services/plan-feature-catalog.service';
+import { CatalogItem } from '../../../management/models/catalog-crud-model';
 
 const IVA_RATE = 0.16;
 
@@ -19,11 +21,42 @@ const CARD_GRADIENTS = [
   templateUrl: './plans.html',
 })
 export class Plans {
-  private readonly store = inject(PlansStore);
+  private readonly store = inject(PlansService);
+  private readonly featureCatalogService = inject(PlanFeatureCatalogService);
 
-  readonly plans = computed(() => this.store.plans());
+  readonly plans = signal<PlanModel[]>([]);
+  readonly featureCatalog = signal<CatalogItem[]>([]);
+  readonly loading = signal(false);
+  readonly loadError = signal<string | null>(null);
+  readonly togglingId = signal<number | null>(null);
 
   readonly modal = viewChild.required(PlanFormModal);
+
+  constructor() {
+    this.fetch();
+    this.featureCatalogService.findAll({}).subscribe((response) => this.featureCatalog.set(response.data));
+  }
+
+  featureRows(plan: PlanModel): { name: string; included: boolean }[] {
+    const includedIds = new Set(plan.features.map((feature) => feature.id));
+    return this.featureCatalog().map((feature) => ({ name: feature.name, included: includedIds.has(feature.id) }));
+  }
+
+  private fetch(): void {
+    this.loading.set(true);
+    this.loadError.set(null);
+
+    this.store.findAll().subscribe({
+      next: (plans) => {
+        this.plans.set(plans);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loadError.set('No se pudieron cargar los planes.');
+        this.loading.set(false);
+      },
+    });
+  }
 
   openCreate(): void {
     this.modal().open();
@@ -33,10 +66,19 @@ export class Plans {
     this.modal().open(plan);
   }
 
-  removePlan(plan: PlanModel): void {
-    if (confirm(`¿Eliminar el plan "${plan.name}"?`)) {
-      this.store.remove(plan.id);
-    }
+  onSaved(): void {
+    this.fetch();
+  }
+
+  toggleStatus(plan: PlanModel): void {
+    this.togglingId.set(plan.id);
+    this.store.update(plan.id, { status: !plan.status }).subscribe({
+      next: () => {
+        this.togglingId.set(null);
+        this.fetch();
+      },
+      error: () => this.togglingId.set(null),
+    });
   }
 
   ivaOf(amount: number): number {
