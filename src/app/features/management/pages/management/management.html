@@ -1,14 +1,23 @@
 <section class="flex flex-col gap-1">
   <h1 class="text-2xl font-bold text-base-content">Gestión</h1>
-  <p class="text-sm text-base-content/60">Configura usuarios, permisos y preferencias generales del sistema.</p>
+  <p class="text-sm text-base-content/60">Configura los catálogos que utilizan los establecimientos y el resto del sistema.</p>
 </section>
 
-<section class="card bg-base-100 shadow-sm mt-5">
-  <div class="card-body items-center gap-3 py-16 text-center">
-    <div class="flex size-14 items-center justify-center rounded-2xl bg-neutral/10">
-      <i class="material-symbols-rounded text-[28px]! text-neutral">settings</i>
-    </div>
-    <h2 class="font-bold text-base-content">Próximamente</h2>
-    <p class="text-sm text-base-content/60 max-w-sm">Esta sección está en construcción.</p>
+<section class="flex flex-col gap-3 mt-5">
+  <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/50">Catálogos de establecimientos</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <app-catalog-crud [adapter]="turnoverCatalog" viewAllRoute="/gestion/catalogos/turnover" />
+    <app-catalog-crud [adapter]="clientRoleCatalog" viewAllRoute="/gestion/catalogos/client-roles" />
+    <app-catalog-crud [adapter]="paymentMethodCatalog" viewAllRoute="/gestion/catalogos/payment-methods" />
+    <app-catalog-crud [adapter]="paymentFormCatalog" viewAllRoute="/gestion/catalogos/payment-forms" />
+    <app-catalog-crud [adapter]="checklistItemTypeCatalog" viewAllRoute="/gestion/catalogos/checklist-item-types" />
+  </div>
+</section>
+
+<section class="flex flex-col gap-3 mt-6 mb-6">
+  <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/50">Catálogos de planes y sistema</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <app-catalog-crud [adapter]="planFeatureCatalog" viewAllRoute="/gestion/catalogos/plan-feature" />
+    <app-catalog-crud [adapter]="roleCatalog" viewAllRoute="/gestion/catalogos/roles" />
   </div>
 </section>

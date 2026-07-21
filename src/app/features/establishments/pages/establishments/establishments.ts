@@ -1,103 +1,122 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { EstablishmentModel } from '../../models/establishment-model';
-import { BUSINESS_TYPE_OPTIONS, MANAGER_OPTIONS, RISK_OPTIONS } from '../../models/establishment-options';
-import { EstablishmentsStore } from '../../services/establishments-store';
+import { EstablishmentService } from '../../services/establishment.service';
+import { EstablishmentCatalogsService } from '../../services/establishment-catalogs.service';
+import { Establishment, EstablishmentStatus, Turnover } from '../../models/establishment-model';
+import { ESTABLISHMENT_STATUS_LABELS, ESTABLISHMENT_STATUS_OPTIONS } from '../../models/establishment-options';
+import { PaginationMeta } from '../../../../core/models/pagination-model';
+
+const SEARCH_DEBOUNCE_MS = 350;
+const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-establishments',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink],
   templateUrl: './establishments.html',
 })
 export class Establishments {
-  private readonly store = inject(EstablishmentsStore);
+  private readonly service = inject(EstablishmentService);
+  private readonly catalogs = inject(EstablishmentCatalogsService);
 
-  readonly businessTypeOptions = BUSINESS_TYPE_OPTIONS;
-  readonly riskOptions = RISK_OPTIONS;
-  readonly managerOptions = MANAGER_OPTIONS;
+  readonly statusOptions = ESTABLISHMENT_STATUS_OPTIONS;
+  readonly statusLabels = ESTABLISHMENT_STATUS_LABELS;
+  readonly turnovers = signal<Turnover[]>([]);
+
+  readonly items = signal<Establishment[]>([]);
+  readonly meta = signal<PaginationMeta | null>(null);
+  readonly loading = signal(false);
+  readonly loadError = signal<string | null>(null);
 
   readonly search = signal('');
-  readonly businessTypeFilter = signal('');
-  readonly riskFilter = signal('');
-  readonly managerFilter = signal('');
+  readonly turnoverFilter = signal('');
+  readonly statusFilter = signal('');
+  readonly page = signal(1);
+
+  private searchDebounceHandle?: ReturnType<typeof setTimeout>;
 
   readonly filtered = computed(() => {
-    const term = this.search().trim().toLowerCase();
-    const businessType = this.businessTypeFilter();
-    const risk = this.riskFilter();
-    const manager = this.managerFilter();
+    const turnover = this.turnoverFilter();
+    const status = this.statusFilter();
 
-    return this.store.establishments().filter((item) => {
-      const matchesSearch =
-        !term ||
-        item.tradeName.toLowerCase().includes(term) ||
-        item.legalName.toLowerCase().includes(term);
-      const matchesBusinessType = !businessType || item.businessType === businessType;
-      const matchesRisk = !risk || item.risk === risk;
-      const matchesManager = !manager || item.assignedManager === manager;
-      return matchesSearch && matchesBusinessType && matchesRisk && matchesManager;
+    return this.items().filter((item) => {
+      const matchesTurnover = !turnover || item.turnover.id === Number(turnover);
+      const matchesStatus = !status || item.establishment_status === status;
+      return matchesTurnover && matchesStatus;
     });
   });
 
+  constructor() {
+    this.catalogs.getTurnovers().subscribe((turnovers) => this.turnovers.set(turnovers));
+    this.fetch();
+  }
+
+  private fetch(): void {
+    this.loading.set(true);
+    this.loadError.set(null);
+
+    this.service.findAll({ page: this.page(), limit: PAGE_SIZE, search: this.search() || undefined }).subscribe({
+      next: (response) => {
+        this.items.set(response.data);
+        this.meta.set(response.meta);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loadError.set('No se pudieron cargar los establecimientos.');
+        this.loading.set(false);
+      },
+    });
+  }
+
   onSearchInput(event: Event): void {
-    this.search.set((event.target as HTMLInputElement).value);
+    const value = (event.target as HTMLInputElement).value;
+    this.search.set(value);
+
+    clearTimeout(this.searchDebounceHandle);
+    this.searchDebounceHandle = setTimeout(() => {
+      this.page.set(1);
+      this.fetch();
+    }, SEARCH_DEBOUNCE_MS);
   }
 
-  onBusinessTypeChange(event: Event): void {
-    this.businessTypeFilter.set((event.target as HTMLSelectElement).value);
+  onTurnoverFilterChange(event: Event): void {
+    this.turnoverFilter.set((event.target as HTMLSelectElement).value);
   }
 
-  onRiskChange(event: Event): void {
-    this.riskFilter.set((event.target as HTMLSelectElement).value);
+  onStatusFilterChange(event: Event): void {
+    this.statusFilter.set((event.target as HTMLSelectElement).value);
   }
 
-  onManagerChange(event: Event): void {
-    this.managerFilter.set((event.target as HTMLSelectElement).value);
+  goToPage(page: number): void {
+    const meta = this.meta();
+    if (page < 1 || (meta && page > meta.totalPages)) return;
+    this.page.set(page);
+    this.fetch();
   }
 
-  statusBadgeClass(status: EstablishmentModel['status']): string {
+  remove(establishment: Establishment): void {
+    if (!confirm(`¿Dar de baja "${establishment.name}"?`)) return;
+    this.service.remove(establishment.id).subscribe(() => this.fetch());
+  }
+
+  statusBadgeClass(status: EstablishmentStatus): string {
     switch (status) {
-      case 'Activo':
+      case EstablishmentStatus.CLIENT:
         return 'badge-success';
-      case 'Prospecto':
+      case EstablishmentStatus.PROSPECT:
         return 'badge-info';
-      case 'Baja':
+      case EstablishmentStatus.DEACTIVATE:
         return 'badge-error';
     }
   }
 
-  statusIcon(status: EstablishmentModel['status']): string {
+  statusIcon(status: EstablishmentStatus): string {
     switch (status) {
-      case 'Activo':
+      case EstablishmentStatus.CLIENT:
         return 'check_circle';
-      case 'Prospecto':
+      case EstablishmentStatus.PROSPECT:
         return 'info';
-      case 'Baja':
+      case EstablishmentStatus.DEACTIVATE:
         return 'error';
-    }
-  }
-
-  riskBarClasses(risk: EstablishmentModel['risk']): [string, string, string] {
-    const off = 'bg-base-300';
-    switch (risk) {
-      case 'Bajo':
-        return ['bg-success', off, off];
-      case 'Medio':
-        return ['bg-warning', 'bg-warning', off];
-      case 'Alto':
-        return ['bg-error', 'bg-error', 'bg-error'];
-    }
-  }
-
-  riskTextClass(risk: EstablishmentModel['risk']): string {
-    switch (risk) {
-      case 'Bajo':
-        return 'text-success';
-      case 'Medio':
-        return 'text-warning';
-      case 'Alto':
-        return 'text-error';
     }
   }
 }

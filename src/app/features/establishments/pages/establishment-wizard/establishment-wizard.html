@@ -1,0 +1,58 @@
+<section class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">{{ isEditMode() ? 'Editar establecimiento' : 'Nuevo establecimiento' }}</h1>
+    <p class="text-sm text-base-content/60">Completa cada sección y guarda tu avance; puedes salir y continuar después.</p>
+  </div>
+  <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
+    <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
+    Volver
+  </a>
+</section>
+
+<ul class="steps steps-vertical sm:steps-horizontal w-full mt-5">
+  @for (step of steps; track step.id) {
+  <li class="step" [class.step-primary]="currentStep() === step.id || (step.id !== 'general' && canLeaveGeneral())"
+    [class.cursor-pointer]="step.id === 'general' || canLeaveGeneral()"
+    [class.opacity-40]="step.id !== 'general' && !canLeaveGeneral()"
+    (click)="goToStep(step.id)">
+    {{ step.label }}
+  </li>
+  }
+</ul>
+
+<form class="mt-5 flex flex-col gap-4 mb-6" (submit)="$event.preventDefault()">
+  <app-establishment-step-general
+    [hidden]="currentStep() !== 'general'"
+    [establishmentId]="establishmentId()"
+    (saved)="onGeneralSaved($event)"
+    (cancelled)="cancel()"
+  />
+
+  <app-establishment-step-contact
+    [hidden]="currentStep() !== 'contacto'"
+    [establishmentId]="establishmentId()"
+    (saved)="goToStep('operacion')"
+    (back)="goToStep('general')"
+  />
+
+  <app-establishment-step-operation
+    [hidden]="currentStep() !== 'operacion'"
+    [establishmentId]="establishmentId()"
+    (saved)="goToStep('facturacion')"
+    (back)="goToStep('contacto')"
+  />
+
+  <app-establishment-step-billing
+    [hidden]="currentStep() !== 'facturacion'"
+    [establishmentId]="establishmentId()"
+    (saved)="goToStep('checklist')"
+    (back)="goToStep('operacion')"
+  />
+
+  <app-establishment-step-checklist
+    [hidden]="currentStep() !== 'checklist'"
+    [establishmentId]="establishmentId()"
+    (back)="goToStep('facturacion')"
+    (finish)="finish()"
+  />
+</form>

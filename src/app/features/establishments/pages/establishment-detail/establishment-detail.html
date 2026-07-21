@@ -2,27 +2,37 @@
 
 <section class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
   <div>
-    <h1 class="text-2xl font-bold text-base-content">{{ item.tradeName }}</h1>
-    <p class="text-sm text-base-content/60">{{ item.legalName }}</p>
+    <h1 class="text-2xl font-bold text-base-content">{{ item.name }}</h1>
+    <p class="text-sm text-base-content/60">{{ item.business_name }}</p>
   </div>
-  <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
-    <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
-    Volver
-  </a>
+  <div class="flex gap-2">
+    <a [routerLink]="['/establecimientos', item.id, 'editar']" class="btn btn-primary btn-sm">
+      <i class="material-symbols-rounded text-[18px]!">edit</i>
+      Editar
+    </a>
+    <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
+      <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
+      Volver
+    </a>
+  </div>
 </section>
 
-<section class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+<section class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
   <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
     <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Estatus</p>
-    <span class="badge badge-soft mt-1" [class]="statusBadgeClass(item.status)">{{ item.status }}</span>
-  </div>
-  <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
-    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Riesgo</p>
-    <span class="badge badge-soft mt-1" [class]="riskBadgeClass(item.risk)">{{ item.risk }}</span>
+    <span class="badge badge-soft mt-1" [class]="statusBadgeClass(item.establishment_status)">{{ statusLabels[item.establishment_status] }}</span>
   </div>
   <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
     <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">RFC</p>
     <p class="mt-1 text-sm font-bold text-base-content font-mono">{{ item.rfc }}</p>
+  </div>
+  <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Giro</p>
+    <p class="mt-1 text-sm font-bold text-base-content">{{ item.turnover.name }}</p>
+  </div>
+  <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Plan</p>
+    <p class="mt-1 text-sm font-bold text-base-content">{{ item.plan.name }}</p>
   </div>
 </section>
 
@@ -36,15 +46,14 @@
       </h2>
       <dl class="flex flex-col gap-2 text-sm">
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Calle</dt><dd class="font-medium text-base-content text-right">{{ item.street }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Número exterior</dt><dd class="font-medium text-base-content text-right">{{ item.exteriorNumber }}</dd></div>
-        @if (item.interiorNumber) {
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Número interior</dt><dd class="font-medium text-base-content text-right">{{ item.interiorNumber }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Número exterior</dt><dd class="font-medium text-base-content text-right">{{ item.ext_number }}</dd></div>
+        @if (item.int_number) {
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Número interior</dt><dd class="font-medium text-base-content text-right">{{ item.int_number }}</dd></div>
         }
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Código postal</dt><dd class="font-medium text-base-content text-right">{{ item.postalCode }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Código postal</dt><dd class="font-medium text-base-content text-right">{{ item.postal_code }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Colonia</dt><dd class="font-medium text-base-content text-right">{{ item.neighborhood }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-base-content/50">Estado</dt><dd class="font-medium text-base-content text-right">{{ item.state }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Municipio</dt><dd class="font-medium text-base-content text-right">{{ item.municipality }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Giro comercial</dt><dd class="font-medium text-base-content text-right">{{ item.businessType }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Municipio</dt><dd class="font-medium text-base-content text-right">{{ item.city }}</dd></div>
       </dl>
     </div>
   </div>
@@ -52,52 +61,207 @@
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body gap-3">
       <h2 class="font-bold text-base-content flex items-center gap-2">
-        <i class="material-symbols-rounded text-[18px]! text-primary">payments</i>
-        Comercial y cobranza
+        <i class="material-symbols-rounded text-[18px]! text-primary">person</i>
+        Responsable
       </h2>
       <dl class="flex flex-col gap-2 text-sm">
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Responsable asignado</dt><dd class="font-medium text-base-content text-right">{{ item.assignedManager }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Paquete contratado</dt><dd class="font-medium text-base-content text-right">{{ item.contractedPackage }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Cobro mensual</dt><dd class="font-medium text-base-content text-right">{{ item.monthlyFee | currency }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Cámaras instaladas</dt><dd class="font-medium text-base-content text-right">{{ item.installedCameras }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Nombre</dt><dd class="font-medium text-base-content text-right">{{ item.designated_person.name }} {{ item.designated_person.first_last_name }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Correo</dt><dd class="font-medium text-base-content text-right">{{ item.designated_person.email }}</dd></div>
       </dl>
+
+      @if (item.comment) {
+      <div class="divider my-1 text-xs font-semibold uppercase tracking-wide text-base-content/40">Observaciones</div>
+      <p class="text-sm text-base-content/70">{{ item.comment }}</p>
+      }
     </div>
   </div>
 
-  <div class="card bg-base-100 shadow-sm md:col-span-2">
+  <div class="card bg-base-100 shadow-sm">
     <div class="card-body gap-3">
       <h2 class="font-bold text-base-content flex items-center gap-2">
         <i class="material-symbols-rounded text-[18px]! text-primary">call</i>
         Contacto
       </h2>
+      @if (contact(); as c) {
       <dl class="flex flex-col gap-2 text-sm">
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Nombre de contacto</dt><dd class="font-medium text-base-content text-right">{{ item.contactName }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Teléfono</dt><dd class="font-medium text-base-content text-right">{{ item.contactPhone }}</dd></div>
-        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Correo</dt><dd class="font-medium text-base-content text-right">{{ item.email }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Rol</dt><dd class="font-medium text-base-content text-right">{{ c.contact_role.name }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Nombre</dt><dd class="font-medium text-base-content text-right">{{ c.contact_name }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Teléfono</dt><dd class="font-medium text-base-content text-right">{{ c.contact_number }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Correo</dt><dd class="font-medium text-base-content text-right">{{ c.contact_email }}</dd></div>
+      </dl>
+      } @else {
+      <p class="text-sm text-base-content/50">Aún no se ha capturado el contacto de este establecimiento.</p>
+      <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar información</a>
+      }
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-3">
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">security</i>
+        Operación y riesgo
+      </h2>
+      @if (operation(); as op) {
+      <dl class="flex flex-col gap-2 text-sm">
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Riesgo</dt><dd class="font-medium text-base-content text-right">{{ riskLabels[op.risk] }}</dd></div>
+        @if (op.risk_factor) {
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Factor de riesgo</dt><dd class="font-medium text-base-content text-right">{{ op.risk_factor }}</dd></div>
+        }
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Cámaras instaladas</dt><dd class="font-medium text-base-content text-right">{{ op.cameras }}</dd></div>
+        @if (op.install_date) {
+        <div class="flex justify-between gap-3"><dt class="text-base-content/50">Fecha de instalación</dt><dd class="font-medium text-base-content text-right">{{ op.install_date }}</dd></div>
+        }
       </dl>
 
       <div class="divider my-1 text-xs font-semibold uppercase tracking-wide text-base-content/40">Sistemas asignados</div>
-
-      <dl class="flex flex-col gap-2 text-sm">
-        <div class="flex justify-between items-center gap-3">
-          <dt class="text-base-content/50">GIA</dt>
-          <dd><span class="badge badge-soft" [class]="item.gia ? 'badge-success' : 'badge-ghost'">{{ item.gia ? 'Activo' : 'Inactivo' }}</span></dd>
-        </div>
-        <div class="flex justify-between items-center gap-3">
-          <dt class="text-base-content/50">COVIA</dt>
-          <dd><span class="badge badge-soft" [class]="item.covia ? 'badge-success' : 'badge-ghost'">{{ item.covia ? 'Activo' : 'Inactivo' }}</span></dd>
-        </div>
-      </dl>
+      <div class="flex gap-2 flex-wrap">
+        <span class="badge badge-soft" [class]="op.gia ? 'badge-success' : 'badge-ghost'">GIA {{ op.gia ? 'activo' : 'inactivo' }}</span>
+        <span class="badge badge-soft" [class]="op.covia ? 'badge-success' : 'badge-ghost'">COVIA {{ op.covia ? 'activo' : 'inactivo' }}</span>
+        <span class="badge badge-soft" [class]="op.ria ? 'badge-success' : 'badge-ghost'">RIA {{ op.ria ? 'activo' : 'inactivo' }}</span>
+      </div>
+      } @else {
+      <p class="text-sm text-base-content/50">Aún no se ha capturado la información operativa de este establecimiento.</p>
+      <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar información</a>
+      }
     </div>
   </div>
 
   <div class="card bg-base-100 shadow-sm md:col-span-2">
     <div class="card-body gap-3">
       <h2 class="font-bold text-base-content flex items-center gap-2">
-        <i class="material-symbols-rounded text-[18px]! text-primary">sticky_note_2</i>
-        Observaciones
+        <i class="material-symbols-rounded text-[18px]! text-primary">payments</i>
+        Facturación
       </h2>
-      <p class="text-sm text-base-content/70">{{ item.notes || 'Sin observaciones registradas.' }}</p>
+      @if (billing(); as b) {
+      <dl class="flex flex-col gap-2 text-sm sm:grid sm:grid-cols-3 sm:gap-4">
+        <div class="flex justify-between gap-3 sm:flex-col sm:gap-0"><dt class="text-base-content/50">Cobro mensual</dt><dd class="font-medium text-base-content text-right sm:text-left">{{ b.monthly_bill | currency }}</dd></div>
+        <div class="flex justify-between gap-3 sm:flex-col sm:gap-0"><dt class="text-base-content/50">Método de pago</dt><dd class="font-medium text-base-content text-right sm:text-left">{{ b.payment_method.name }}</dd></div>
+        <div class="flex justify-between gap-3 sm:flex-col sm:gap-0"><dt class="text-base-content/50">Forma de pago</dt><dd class="font-medium text-base-content text-right sm:text-left">{{ b.payment_form.name }}</dd></div>
+      </dl>
+      } @else {
+      <p class="text-sm text-base-content/50">Aún no se ha capturado la información de facturación de este establecimiento.</p>
+      <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar información</a>
+      }
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm md:col-span-2">
+    <div class="card-body gap-3">
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">checklist</i>
+        Checklist operativo
+      </h2>
+      @if (checklist().length) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        @for (entry of checklist(); track entry.item_type.id) {
+        <div class="flex items-center justify-between gap-3 rounded-box border border-base-300 px-3 py-2">
+          <span class="text-sm font-medium text-base-content">{{ entry.item_type.name }}</span>
+          <div class="flex items-center gap-2">
+            @if (entry.document_url) {
+            <a [href]="entry.document_url" target="_blank" rel="noopener" class="link link-primary text-xs">Ver</a>
+            }
+            <span class="badge badge-soft" [class]="entry.completed ? 'badge-success' : 'badge-ghost'">{{ entry.completed ? 'Completado' : 'Pendiente' }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <p class="text-sm text-base-content/50">Sin información del checklist operativo.</p>
+      }
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-sm md:col-span-2">
+    <div class="card-body gap-4">
+      <h2 class="font-bold text-base-content flex items-center gap-2">
+        <i class="material-symbols-rounded text-[18px]! text-primary">receipt_long</i>
+        Cobros
+      </h2>
+
+      @if (paymentSummary(); as summary) {
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="rounded-box border border-base-300 px-3 py-2.5">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Total pagado</p>
+          <p class="mt-1 text-sm font-bold text-base-content">{{ summary.totalPaid | currency }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 px-3 py-2.5">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Meses transcurridos</p>
+          <p class="mt-1 text-sm font-bold text-base-content">{{ summary.monthsElapsed ?? '—' }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 px-3 py-2.5">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Total esperado</p>
+          <p class="mt-1 text-sm font-bold text-base-content">{{ summary.expectedTotal !== null ? (summary.expectedTotal | currency) : '—' }}</p>
+        </div>
+        <div class="rounded-box border border-base-300 px-3 py-2.5">
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/45">Saldo vencido</p>
+          <p class="mt-1 text-sm font-bold" [class]="(summary.overdueBalance ?? 0) > 0 ? 'text-error' : 'text-success'">
+            {{ summary.overdueBalance !== null ? (summary.overdueBalance | currency) : '—' }}
+          </p>
+        </div>
+      </div>
+      }
+
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Periodo</th>
+              <th>Folio</th>
+              <th>Monto</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loadingPayments()) {
+            <tr><td colspan="4" class="text-center py-6"><span class="loading loading-spinner loading-sm"></span></td></tr>
+            } @else {
+            @for (record of paymentRecords(); track record.id) {
+            <tr>
+              <td>{{ monthLabel(record.period_month) }} {{ record.period_year }}</td>
+              <td class="font-mono text-xs">{{ record.folio }}</td>
+              <td>{{ record.amount | currency }}</td>
+              <td>
+                <button type="button" class="btn btn-ghost btn-xs text-error" (click)="removePaymentRecord(record)">
+                  <i class="material-symbols-rounded text-[16px]!">delete</i>
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr><td colspan="4" class="text-center text-base-content/50 py-6">Sin pagos registrados.</td></tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="divider my-1 text-xs font-semibold uppercase tracking-wide text-base-content/40">Registrar pago</div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 items-end">
+        <label class="fieldset">
+          <span class="label text-xs">Mes</span>
+          <input type="number" class="input w-full" [formField]="paymentForm.period_month" />
+        </label>
+        <label class="fieldset">
+          <span class="label text-xs">Año</span>
+          <input type="number" class="input w-full" [formField]="paymentForm.period_year" />
+        </label>
+        <label class="fieldset">
+          <span class="label text-xs">Folio</span>
+          <input type="text" class="input w-full" [formField]="paymentForm.folio" />
+        </label>
+        <label class="fieldset">
+          <span class="label text-xs">Monto</span>
+          <input type="number" step="0.01" class="input w-full" [formField]="paymentForm.amount" />
+        </label>
+        <button type="button" class="btn btn-primary" [disabled]="savingPayment()" (click)="addPaymentRecord()">
+          @if (savingPayment()) { <span class="loading loading-spinner loading-xs"></span> }
+          Agregar
+        </button>
+      </div>
+      @if (paymentError()) {
+      <p class="text-error text-xs">{{ paymentError() }}</p>
+      }
     </div>
   </div>
 
@@ -105,7 +269,7 @@
 
 </section>
 
-} @else {
+} @else if (establishment() === null) {
 
 <section class="card bg-base-100 shadow-sm">
   <div class="card-body items-center gap-3 py-16 text-center">
@@ -113,6 +277,12 @@
     <p class="text-sm text-base-content/60">Revisa el enlace o vuelve al listado de establecimientos.</p>
     <a routerLink="/establecimientos" class="btn btn-primary btn-sm mt-2">Volver al listado</a>
   </div>
+</section>
+
+} @else {
+
+<section class="flex justify-center py-16">
+  <span class="loading loading-spinner loading-lg"></span>
 </section>
 
 }

@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,6 +8,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Theme } from '../../../../core/services/theme';
 import { LoginModel } from '../../../../core/models/login-model';
 import { emailSchema, passwordSchema } from '../../../../shared/forms/field-schemas';
+import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
 @Component({
   selector: 'app-login-page',
@@ -99,27 +99,12 @@ export class LoginPage implements AfterViewInit {
         this.router.navigateByUrl(returnUrl);
       } 
       catch (error) {
-        this.errorMessage.set(this.resolveErrorMessage(error));
-      } 
+        this.errorMessage.set(resolveErrorMessage(error, 'Ocurrió un error al iniciar sesión. Intenta de nuevo.'));
+      }
       finally {
         this.loading.set(false);
       }
     });
-  }
-
-  private resolveErrorMessage(error: unknown): string {
-
-    if (error instanceof HttpErrorResponse) {
-      const message = error.error?.message;
-      
-      if (Array.isArray(message)) {
-        return message[0];
-      }
-      if (typeof message === 'string') {
-        return message;
-      }
-    }
-    return 'Ocurrió un error al iniciar sesión. Intenta de nuevo.';
   }
 
 }

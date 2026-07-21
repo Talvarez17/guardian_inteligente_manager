@@ -1,0 +1,170 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Datos generales</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <label class="fieldset">
+        <span class="label text-xs">Nombre comercial</span>
+        <input type="text" class="input w-full" [formField]="coreForm.name" />
+        @if (coreForm.name().invalid() && coreForm.name().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.name().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Razón social</span>
+        <input type="text" class="input w-full" [formField]="coreForm.business_name" />
+        @if (coreForm.business_name().invalid() && coreForm.business_name().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.business_name().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">RFC</span>
+        <input type="text" class="input w-full" [formField]="coreForm.rfc" />
+        @if (coreForm.rfc().invalid() && coreForm.rfc().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.rfc().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Giro comercial</span>
+        <select class="select w-full" [value]="coreModel().turnover_id || ''" (change)="onTurnoverChange($event)">
+          <option value="" disabled>Selecciona un giro</option>
+          @for (turnover of turnovers(); track turnover.id) {
+          <option [value]="turnover.id">{{ turnover.name }}</option>
+          }
+        </select>
+        @if (turnoverTouched() && coreModel().turnover_id === 0) {
+        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Plan contratado</span>
+        <select class="select w-full" [value]="coreModel().plan_id || ''" (change)="onPlanChange($event)">
+          <option value="" disabled>Selecciona un plan</option>
+          @for (plan of plans(); track plan.id) {
+          <option [value]="plan.id">{{ plan.name }}</option>
+          }
+        </select>
+        @if (planTouched() && coreModel().plan_id === 0) {
+        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Responsable asignado</span>
+        <select class="select w-full" [formField]="coreForm.designated_person_id">
+          <option value="" disabled>Selecciona un responsable</option>
+          @for (person of designatedPersons(); track person.id) {
+          <option [value]="person.id">{{ person.name }} {{ person.first_last_name }}</option>
+          }
+        </select>
+        @if (coreForm.designated_person_id().invalid() && coreForm.designated_person_id().touched()) {
+        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Estatus</span>
+        <select class="select w-full" [formField]="coreForm.establishment_status">
+          @for (status of statusOptions; track status) {
+          <option [value]="status">{{ statusLabels[status] }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Ubicación</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <label class="fieldset sm:col-span-2">
+        <span class="label text-xs">Calle</span>
+        <input type="text" class="input w-full" [formField]="coreForm.street" />
+        @if (coreForm.street().invalid() && coreForm.street().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.street().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Colonia</span>
+        <input type="text" class="input w-full" [formField]="coreForm.neighborhood" />
+        @if (coreForm.neighborhood().invalid() && coreForm.neighborhood().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.neighborhood().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Número exterior</span>
+        <input type="text" class="input w-full" [formField]="coreForm.ext_number" />
+        @if (coreForm.ext_number().invalid() && coreForm.ext_number().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.ext_number().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Número interior</span>
+        <input type="text" class="input w-full" [formField]="coreForm.int_number" />
+        @if (coreForm.int_number().invalid() && coreForm.int_number().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.int_number().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Código postal</span>
+        <input type="text" inputmode="numeric" class="input w-full" [formField]="coreForm.postal_code" />
+        @if (coreForm.postal_code().invalid() && coreForm.postal_code().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.postal_code().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Estado</span>
+        <select class="select w-full" [formField]="coreForm.state">
+          <option value="" disabled>Selecciona un estado</option>
+          @for (state of stateOptions; track state) {
+          <option [value]="state">{{ state }}</option>
+          }
+        </select>
+        @if (coreForm.state().invalid() && coreForm.state().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.state().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Municipio</span>
+        <select class="select w-full" [formField]="coreForm.city">
+          <option value="" disabled>Selecciona un municipio</option>
+          @for (city of cityOptions(); track city) {
+          <option [value]="city">{{ city }}</option>
+          }
+        </select>
+        @if (coreForm.city().invalid() && coreForm.city().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.city().errors()[0].message }}</p>
+        }
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Observaciones</h2>
+    <textarea class="textarea w-full" rows="3" [formField]="coreForm.comment"></textarea>
+  </div>
+</div>
+
+@if (coreError()) {
+<div class="alert alert-error text-sm">{{ coreError() }}</div>
+}
+
+<div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+  <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+  <button type="button" class="btn btn-primary" [disabled]="savingCore()" (click)="save()">
+    @if (savingCore()) { <span class="loading loading-spinner loading-xs"></span> }
+    Guardar y continuar
+  </button>
+</div>

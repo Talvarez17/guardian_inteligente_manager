@@ -1,0 +1,85 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Riesgo</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <label class="fieldset">
+        <span class="label text-xs">Nivel de riesgo</span>
+        <select class="select w-full" [formField]="operationForm.risk">
+          @for (risk of riskOptions; track risk) {
+          <option [value]="risk">{{ riskLabels[risk] }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Factor de riesgo</span>
+        <input type="text" class="input w-full" [formField]="operationForm.risk_factor" />
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Cámaras instaladas</span>
+        <input type="number" class="input w-full" [formField]="operationForm.cameras" />
+        @if (operationForm.cameras().invalid() && operationForm.cameras().touched()) {
+        <p class="text-error text-xs mt-1">{{ operationForm.cameras().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Factor de inactividad</span>
+        <input type="text" class="input w-full" [formField]="operationForm.inactive_factor" />
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Sistemas asignados</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <label class="flex items-center gap-2 cursor-pointer h-12">
+        <input type="checkbox" class="toggle toggle-primary" [formField]="operationForm.gia" />
+        <span class="text-sm font-medium text-base-content">GIA</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer h-12">
+        <input type="checkbox" class="toggle toggle-primary" [formField]="operationForm.covia" />
+        <span class="text-sm font-medium text-base-content">COVIA</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer h-12">
+        <input type="checkbox" class="toggle toggle-primary" [formField]="operationForm.ria" />
+        <span class="text-sm font-medium text-base-content">RIA</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Fechas de instalación</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <label class="fieldset">
+        <span class="label text-xs">Fecha de instalación programada</span>
+        <input type="date" class="input w-full" [formField]="operationForm.install_date" />
+      </label>
+      <label class="fieldset">
+        <span class="label text-xs">Fecha de instalación real</span>
+        <input type="date" class="input w-full" [formField]="operationForm.real_install_date" />
+      </label>
+      <label class="fieldset">
+        <span class="label text-xs">Fecha de baja</span>
+        <input type="date" class="input w-full" [formField]="operationForm.closing_date" />
+      </label>
+    </div>
+  </div>
+</div>
+
+@if (operationError()) {
+<div class="alert alert-error text-sm">{{ operationError() }}</div>
+}
+
+<div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+  <button type="button" class="btn btn-ghost" (click)="back.emit()">Atrás</button>
+  <button type="button" class="btn btn-primary" [disabled]="savingOperation()" (click)="save()">
+    @if (savingOperation()) { <span class="loading loading-spinner loading-xs"></span> }
+    Guardar y continuar
+  </button>
+</div>

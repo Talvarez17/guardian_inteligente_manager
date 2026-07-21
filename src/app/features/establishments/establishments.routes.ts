@@ -7,11 +7,11 @@ export const ESTABLISHMENTS_ROUTES: Routes = [
   },
   {
     path: 'nuevo',
-    loadComponent: () => import('./pages/establishment-form/establishment-form').then((m) => m.EstablishmentForm),
+    loadComponent: () => import('./pages/establishment-wizard/establishment-wizard').then((m) => m.EstablishmentWizard),
   },
   {
     path: ':id/editar',
-    loadComponent: () => import('./pages/establishment-form/establishment-form').then((m) => m.EstablishmentForm),
+    loadComponent: () => import('./pages/establishment-wizard/establishment-wizard').then((m) => m.EstablishmentWizard),
   },
   {
     path: ':id',

@@ -1,0 +1,41 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Checklist operativo</h2>
+    <p class="text-sm text-base-content/60">Marca cada punto como completado y adjunta el documento que lo respalda, si aplica.</p>
+
+    @if (loadingChecklist()) {
+    <div class="flex justify-center py-6"><span class="loading loading-spinner"></span></div>
+    } @else {
+    <div class="flex flex-col divide-y divide-base-300">
+      @for (row of checklistRows(); track row.item_type.id) {
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 py-3">
+        <label class="flex items-center gap-2 cursor-pointer w-56 shrink-0">
+          <input type="checkbox" class="toggle toggle-primary" [checked]="row.completed" (change)="toggleChecklistCompleted(row)" />
+          <span class="text-sm font-medium text-base-content">{{ row.item_type.name }}</span>
+        </label>
+
+        <input type="file" class="file-input file-input-sm w-full sm:max-w-xs" (change)="onChecklistFileSelected(row, $event)" />
+
+        @if (row.document_url) {
+        <a [href]="row.document_url" target="_blank" rel="noopener" class="link link-primary text-xs whitespace-nowrap">Ver documento</a>
+        }
+
+        <button type="button" class="btn btn-outline btn-primary btn-sm sm:ml-auto" [disabled]="row.saving" (click)="saveChecklistItem(row)">
+          @if (row.saving) { <span class="loading loading-spinner loading-xs"></span> }
+          Guardar
+        </button>
+
+        @if (row.error) {
+        <p class="text-error text-xs w-full">{{ row.error }}</p>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>
+
+<div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+  <button type="button" class="btn btn-ghost" (click)="back.emit()">Atrás</button>
+  <button type="button" class="btn btn-primary" (click)="finish.emit()">Finalizar</button>
+</div>

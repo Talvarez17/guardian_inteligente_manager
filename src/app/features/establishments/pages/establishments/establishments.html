@@ -17,91 +17,60 @@
         <path d="m21 21-4.3-4.3"></path>
       </g>
     </svg>
-    <input class="w-full" type="search" placeholder="Buscar por nombre comercial o razón social..."
+    <input class="w-full" type="search" placeholder="Buscar por nombre comercial, razón social o RFC..."
       (input)="onSearchInput($event)" />
   </label>
 
-  <select class="select w-44 flex-auto" (change)="onBusinessTypeChange($event)">
+  <select class="select w-44 flex-auto" (change)="onTurnoverFilterChange($event)">
     <option value="">Giro comercial</option>
-    @for (businessType of businessTypeOptions; track businessType) {
-    <option [value]="businessType">{{ businessType }}</option>
+    @for (turnover of turnovers(); track turnover.id) {
+    <option [value]="turnover.id">{{ turnover.name }}</option>
     }
   </select>
 
-  <select class="select w-40 flex-auto" (change)="onRiskChange($event)">
-    <option value="">Riesgo</option>
-    @for (risk of riskOptions; track risk) {
-    <option [value]="risk">{{ risk }}</option>
-    }
-  </select>
-
-  <select class="select w-48 flex-auto" (change)="onManagerChange($event)">
-    <option value="">Responsable</option>
-    @for (manager of managerOptions; track manager) {
-    <option [value]="manager">{{ manager }}</option>
+  <select class="select w-40 flex-auto" (change)="onStatusFilterChange($event)">
+    <option value="">Estatus</option>
+    @for (status of statusOptions; track status) {
+    <option [value]="status">{{ statusLabels[status] }}</option>
     }
   </select>
 </section>
 
-<section class="card bg-base-100 shadow-sm mt-4 mb-6">
+<section class="card bg-base-100 shadow-sm mt-4 mb-4">
   <div class="overflow-x-auto">
     <table class="table">
       <thead>
         <tr>
           <th>Establecimiento</th>
+          <th>RFC</th>
           <th>Giro</th>
           <th>Responsable</th>
-          <th>Riesgo</th>
+          <th>Plan</th>
           <th>Estatus</th>
-          <th>Cobro mensual</th>
-          <th>GIA / COVIA</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
+        @if (loading()) {
+        <tr>
+          <td colspan="7" class="text-center py-10"><span class="loading loading-spinner"></span></td>
+        </tr>
+        } @else {
         @for (item of filtered(); track item.id) {
         <tr>
           <td>
-            <p class="font-semibold text-base-content">{{ item.tradeName }}</p>
-            <p class="text-xs text-base-content/50">{{ item.legalName }}</p>
+            <p class="font-semibold text-base-content">{{ item.name }}</p>
+            <p class="text-xs text-base-content/50">{{ item.business_name }}</p>
           </td>
-          <td>{{ item.businessType }}</td>
-          <td>{{ item.assignedManager }}</td>
+          <td class="font-mono text-xs">{{ item.rfc }}</td>
+          <td>{{ item.turnover.name }}</td>
+          <td>{{ item.designated_person.name }} {{ item.designated_person.first_last_name }}</td>
+          <td>{{ item.plan.name }}</td>
           <td>
-            @let bars = riskBarClasses(item.risk);
-            <div class="inline-flex items-center gap-1.5">
-              <div class="flex items-end gap-0.5">
-                <span class="w-1.5 h-2 rounded-sm" [class]="bars[0]"></span>
-                <span class="w-1.5 h-2.5 rounded-sm" [class]="bars[1]"></span>
-                <span class="w-1.5 h-3 rounded-sm" [class]="bars[2]"></span>
-              </div>
-              <span class="text-xs font-semibold" [class]="riskTextClass(item.risk)">{{ item.risk }}</span>
-            </div>
-          </td>
-          <td>
-            <span class="badge badge-soft gap-1" [class]="statusBadgeClass(item.status)">
-              <i class="material-symbols-rounded text-[14px]!">{{ statusIcon(item.status) }}</i>
-              {{ item.status }}
+            <span class="badge badge-soft gap-1" [class]="statusBadgeClass(item.establishment_status)">
+              <i class="material-symbols-rounded text-[14px]!">{{ statusIcon(item.establishment_status) }}</i>
+              {{ statusLabels[item.establishment_status] }}
             </span>
-          </td>
-          <td>{{ item.monthlyFee | currency }}</td>
-          <td>
-            <div class="flex gap-1.5">
-              <div class="tooltip" [attr.data-tip]="'GIA ' + (item.gia ? 'activo' : 'inactivo')">
-                <div class="flex size-8 items-center justify-center rounded-xl p-1.5 transition-colors"
-                  [class]="item.gia ? 'bg-success' : 'bg-base-300'">
-                  <img src="images/gia.png" alt="GIA" class="h-full w-full object-contain transition-opacity"
-                    [class.opacity-40]="!item.gia" />
-                </div>
-              </div>
-              <div class="tooltip" [attr.data-tip]="'COVIA ' + (item.covia ? 'activo' : 'inactivo')">
-                <div class="flex size-8 items-center justify-center rounded-xl p-1.5 transition-colors"
-                  [class]="item.covia ? 'bg-success' : 'bg-base-300'">
-                  <img src="images/covia.webp" alt="COVIA" class="h-full w-full object-contain transition-opacity"
-                    [class.opacity-40]="!item.covia" />
-                </div>
-              </div>
-            </div>
           </td>
           <td>
             <div class="join">
@@ -114,16 +83,34 @@
                 <i class="material-symbols-rounded text-[16px]!">edit</i>
                 Editar
               </a>
+              <button type="button" class="btn btn-outline btn-error btn-sm join-item" (click)="remove(item)">
+                <i class="material-symbols-rounded text-[16px]!">block</i>
+              </button>
             </div>
           </td>
         </tr>
         } @empty {
         <tr>
-          <td colspan="8" class="text-center text-base-content/50 py-10">No se encontraron establecimientos con esos
+          <td colspan="7" class="text-center text-base-content/50 py-10">No se encontraron establecimientos con esos
             filtros.</td>
         </tr>
+        }
         }
       </tbody>
     </table>
   </div>
 </section>
+
+@if (meta(); as m) {
+@if (m.totalPages > 1) {
+<section class="flex justify-center mb-6">
+  <div class="join">
+    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === 1" (click)="goToPage(m.page - 1)">«</button>
+    <button type="button" class="join-item btn btn-sm btn-disabled">Página {{ m.page }} de {{ m.totalPages }}</button>
+    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === m.totalPages" (click)="goToPage(m.page + 1)">»</button>
+  </div>
+</section>
+} @else {
+<div class="mb-6"></div>
+}
+}

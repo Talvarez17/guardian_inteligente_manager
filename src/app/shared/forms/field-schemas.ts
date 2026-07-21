@@ -1,4 +1,4 @@
-import { email, maxLength, min, minLength, pattern, required, schema } from '@angular/forms/signals';
+import { email, max, maxLength, min, minLength, pattern, required, schema } from '@angular/forms/signals';
 
 const RFC_PATTERN = /^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/;
 const STREET_NUMBER_PATTERN = /^[a-zA-Z0-9-]+$/;
@@ -49,4 +49,20 @@ export const postalCodeSchema = schema<string>((field) => {
   required(field, { message: 'El código postal es requerido' });
   maxLength(field, 5, { message: 'El código postal debe tener 5 dígitos' });
   pattern(field, POSTAL_CODE_PATTERN, { message: 'El código postal debe tener 5 dígitos' });
+});
+
+export const strictlyPositiveNumberSchema = schema<number>((field) => {
+  required(field, { message: 'Este campo es requerido' });
+  min(field, 0.01, { message: 'El valor debe ser mayor a 0' });
+});
+
+export const monthSchema = schema<number>((field) => {
+  required(field, { message: 'El mes es requerido' });
+  min(field, 1, { message: 'El mes debe estar entre 1 y 12' });
+  max(field, 12, { message: 'El mes debe estar entre 1 y 12' });
+});
+
+export const yearSchema = schema<number>((field) => {
+  required(field, { message: 'El año es requerido' });
+  min(field, 2000, { message: 'Año no válido' });
 });

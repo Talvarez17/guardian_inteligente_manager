@@ -1,0 +1,55 @@
+<div class="card bg-base-100 shadow-sm">
+  <div class="card-body gap-4">
+    <h2 class="font-bold text-base-content">Contacto</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <label class="fieldset">
+        <span class="label text-xs">Rol del contacto</span>
+        <select class="select w-full" [value]="contactModel().contact_role_id || ''" (change)="onContactRoleChange($event)">
+          <option value="" disabled>Selecciona un rol</option>
+          @for (role of clientRoles(); track role.id) {
+          <option [value]="role.id">{{ role.name }}</option>
+          }
+        </select>
+        @if (contactRoleTouched() && contactModel().contact_role_id === 0) {
+        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Nombre de contacto</span>
+        <input type="text" class="input w-full" [formField]="contactForm.contact_name" />
+        @if (contactForm.contact_name().invalid() && contactForm.contact_name().touched()) {
+        <p class="text-error text-xs mt-1">{{ contactForm.contact_name().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Teléfono de contacto</span>
+        <input type="text" class="input w-full" [formField]="contactForm.contact_number" />
+        @if (contactForm.contact_number().invalid() && contactForm.contact_number().touched()) {
+        <p class="text-error text-xs mt-1">{{ contactForm.contact_number().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Correo de contacto</span>
+        <input type="email" class="input w-full" [formField]="contactForm.contact_email" />
+        @if (contactForm.contact_email().invalid() && contactForm.contact_email().touched()) {
+        <p class="text-error text-xs mt-1">{{ contactForm.contact_email().errors()[0].message }}</p>
+        }
+      </label>
+    </div>
+  </div>
+</div>
+
+@if (contactError()) {
+<div class="alert alert-error text-sm">{{ contactError() }}</div>
+}
+
+<div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+  <button type="button" class="btn btn-ghost" (click)="back.emit()">Atrás</button>
+  <button type="button" class="btn btn-primary" [disabled]="savingContact()" (click)="save()">
+    @if (savingContact()) { <span class="loading loading-spinner loading-xs"></span> }
+    Guardar y continuar
+  </button>
+</div>

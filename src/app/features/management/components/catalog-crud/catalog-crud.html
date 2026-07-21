@@ -1,0 +1,134 @@
+<div class="card shadow-sm bg-base-100" [class.card-sm]="mode() === 'compact'">
+  <div class="card-body gap-3">
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="font-bold text-base-content">{{ adapter().labelPlural }}</h2>
+      <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+        <i class="material-symbols-rounded text-[16px]!">add</i>
+        Nuevo
+      </button>
+    </div>
+
+    @if (mode() === 'compact') {
+
+    @if (loading()) {
+    <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
+    } @else if (loadError()) {
+    <p class="text-error text-sm text-center py-6">{{ loadError() }}</p>
+    } @else {
+    <div class="stats stats-vertical sm:stats-horizontal bg-base-200/50 w-full">
+      <div class="stat place-items-center py-3">
+        <div class="stat-title text-xs">Total</div>
+        <div class="stat-value text-2xl">{{ items().length }}</div>
+      </div>
+      <div class="stat place-items-center py-3">
+        <div class="stat-title text-xs">Activos</div>
+        <div class="stat-value text-2xl text-success">{{ activeCount() }}</div>
+      </div>
+      <div class="stat place-items-center py-3">
+        <div class="stat-title text-xs">Inactivos</div>
+        <div class="stat-value text-2xl text-error">{{ inactiveCount() }}</div>
+      </div>
+    </div>
+    }
+
+    @if (viewAllRoute()) {
+    <a [routerLink]="viewAllRoute()" class="btn btn-outline btn-sm w-full">
+      Ver lista
+      <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
+    </a>
+    }
+
+    } @else {
+
+    <label class="input input-sm w-full">
+      <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </g>
+      </svg>
+      <input class="w-full" type="search" [placeholder]="'Buscar ' + adapter().labelPlural.toLowerCase() + '...'"
+        (input)="onSearchInput($event)" />
+    </label>
+
+    <div class="overflow-x-auto">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>{{ adapter().label }}</th>
+            <th>Estatus</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+          <tr><td colspan="3" class="text-center py-6"><span class="loading loading-spinner loading-sm"></span></td></tr>
+          } @else if (loadError()) {
+          <tr><td colspan="3" class="text-center text-error py-6">{{ loadError() }}</td></tr>
+          } @else {
+          @for (item of items(); track item.id) {
+          <tr>
+            <td class="font-medium text-base-content">{{ item.name }}</td>
+            <td>
+              <div class="tooltip" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
+                <input type="checkbox" class="toggle toggle-success" [checked]="item.status"
+                  [disabled]="togglingId() === item.id" (change)="toggleStatus(item)" />
+              </div>
+            </td>
+            <td>
+              <button type="button" class="btn btn-ghost btn-xs" (click)="openEdit(item)">
+                <i class="material-symbols-rounded text-[16px]!">edit</i>
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr><td colspan="3" class="text-center text-base-content/50 py-6">Sin registros.</td></tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (meta(); as m) {
+    @if (m.totalPages > 1) {
+    <div class="flex justify-center">
+      <div class="join">
+        <button type="button" class="join-item btn btn-xs" [disabled]="m.page === 1" (click)="goToPage(m.page - 1)">«</button>
+        <button type="button" class="join-item btn btn-xs btn-disabled">Página {{ m.page }} de {{ m.totalPages }}</button>
+        <button type="button" class="join-item btn btn-xs" [disabled]="m.page === m.totalPages" (click)="goToPage(m.page + 1)">»</button>
+      </div>
+    </div>
+    }
+    }
+
+    }
+  </div>
+</div>
+
+<dialog #dialogRef class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">{{ editingId() ? 'Editar' : 'Nuevo' }} {{ adapter().label.toLowerCase() }}</h3>
+    <div class="py-4">
+      <label class="fieldset">
+        <span class="label text-xs">Nombre</span>
+        <input type="text" class="input w-full" [formField]="itemForm.name" />
+        @if (itemForm.name().invalid() && itemForm.name().touched()) {
+        <p class="text-error text-xs mt-1">{{ itemForm.name().errors()[0].message }}</p>
+        }
+      </label>
+      @if (formError()) {
+      <p class="text-error text-xs mt-2">{{ formError() }}</p>
+      }
+    </div>
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" (click)="closeDialog()">Cancelar</button>
+      <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="loading loading-spinner loading-xs"></span> }
+        Guardar
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

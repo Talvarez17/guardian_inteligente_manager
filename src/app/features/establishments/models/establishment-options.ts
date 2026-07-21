@@ -1,20 +1,25 @@
 import { EstablishmentStatus, EstablishmentRisk } from './establishment-model';
 
-export const BUSINESS_TYPE_OPTIONS: string[] = [
-  'Bar',
-  'Restaurante',
-  'Antro',
-  'Clínica',
-  'Salón de eventos',
-  'Casino',
-  'Gimnasio',
-  'Otro',
+export const ESTABLISHMENT_STATUS_LABELS: Record<EstablishmentStatus, string> = {
+  [EstablishmentStatus.PROSPECT]: 'Prospecto',
+  [EstablishmentStatus.CLIENT]: 'Cliente',
+  [EstablishmentStatus.DEACTIVATE]: 'Baja',
+};
+
+export const ESTABLISHMENT_RISK_LABELS: Record<EstablishmentRisk, string> = {
+  [EstablishmentRisk.LOW]: 'Bajo',
+  [EstablishmentRisk.MID]: 'Medio',
+  [EstablishmentRisk.HIGH]: 'Alto',
+};
+
+export const ESTABLISHMENT_STATUS_OPTIONS: EstablishmentStatus[] = [
+  EstablishmentStatus.PROSPECT,
+  EstablishmentStatus.CLIENT,
+  EstablishmentStatus.DEACTIVATE,
 ];
 
-export const MANAGER_OPTIONS: string[] = ['Mariana Torres', 'Carlos Medina', 'Ana Fernández', 'Diego Salinas'];
-
-export const PACKAGE_OPTIONS: string[] = ['Bienvenida', 'Bienvenida Plus', 'Premium', 'Empresarial'];
-
-export const STATUS_OPTIONS: EstablishmentStatus[] = ['Prospecto', 'Activo', 'Baja'];
-
-export const RISK_OPTIONS: EstablishmentRisk[] = ['Bajo', 'Medio', 'Alto'];
+export const ESTABLISHMENT_RISK_OPTIONS: EstablishmentRisk[] = [
+  EstablishmentRisk.LOW,
+  EstablishmentRisk.MID,
+  EstablishmentRisk.HIGH,
+];
