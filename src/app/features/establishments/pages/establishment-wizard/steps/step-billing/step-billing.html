@@ -12,27 +12,27 @@
 
       <label class="fieldset">
         <span class="label text-xs">Método de pago</span>
-        <select class="select w-full" [value]="billingModel().payment_method_id || ''" (change)="onPaymentMethodChange($event)">
+        <select class="select w-full" [formField]="billingForm.payment_method_id">
           <option value="" disabled>Selecciona un método</option>
           @for (method of paymentMethods(); track method.id) {
           <option [value]="method.id">{{ method.name }}</option>
           }
         </select>
-        @if (paymentMethodTouched() && billingModel().payment_method_id === 0) {
-        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        @if (billingForm.payment_method_id().invalid() && billingForm.payment_method_id().touched()) {
+        <p class="text-error text-xs mt-1">{{ billingForm.payment_method_id().errors()[0].message }}</p>
         }
       </label>
 
       <label class="fieldset">
         <span class="label text-xs">Forma de pago</span>
-        <select class="select w-full" [value]="billingModel().payment_form_id || ''" (change)="onPaymentFormChange($event)">
+        <select class="select w-full" [formField]="billingForm.payment_form_id">
           <option value="" disabled>Selecciona una forma</option>
           @for (form of paymentForms(); track form.id) {
           <option [value]="form.id">{{ form.name }}</option>
           }
         </select>
-        @if (paymentFormTouched() && billingModel().payment_form_id === 0) {
-        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        @if (billingForm.payment_form_id().invalid() && billingForm.payment_form_id().touched()) {
+        <p class="text-error text-xs mt-1">{{ billingForm.payment_form_id().errors()[0].message }}</p>
         }
       </label>
     </div>

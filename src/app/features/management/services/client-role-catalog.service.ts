@@ -12,8 +12,8 @@ export class ClientRoleCatalogService implements CatalogAdapter {
   private readonly http = inject(HttpClient);
 
   readonly key = 'client-roles';
-  readonly label = 'Rol de contacto';
-  readonly labelPlural = 'Roles de contacto';
+  readonly label = 'Cargo de contacto';
+  readonly labelPlural = 'Cargos de contacto';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     let params = new HttpParams();

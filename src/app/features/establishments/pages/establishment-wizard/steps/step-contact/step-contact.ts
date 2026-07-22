@@ -6,11 +6,11 @@ import { EstablishmentContactService } from '../../../../services/establishment-
 import { EstablishmentCatalogsService } from '../../../../services/establishment-catalogs.service';
 import { ClientRole, UpsertEstablishmentContactPayload } from '../../../../models/establishment-contact-model';
 import { ContactModel } from '../../../../models/establishment-wizard-model';
-import { emailSchema, phoneSchema, requiredTextSchema } from '../../../../../../shared/forms/field-schemas';
+import { emailSchema, phoneSchema, requiredSelectSchema, requiredTextSchema } from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
 function emptyContactModel(): ContactModel {
-  return { contact_role_id: 0, contact_name: '', contact_number: '', contact_email: '' };
+  return { contact_role_id: '', contact_name: '', contact_number: '', contact_email: '' };
 }
 
 @Component({
@@ -33,8 +33,8 @@ export class EstablishmentStepContact {
     apply(f.contact_name, requiredTextSchema);
     apply(f.contact_number, phoneSchema);
     apply(f.contact_email, emailSchema);
+    apply(f.contact_role_id, requiredSelectSchema);
   });
-  readonly contactRoleTouched = signal(false);
   readonly savingContact = signal(false);
   readonly contactError = signal<string | null>(null);
 
@@ -47,34 +47,26 @@ export class EstablishmentStepContact {
     const contact = this.existingContactResource.value();
     if (!contact) return;
     this.contactModel.set({
-      contact_role_id: contact.contact_role.id,
+      contact_role_id: String(contact.contact_role.id),
       contact_name: contact.contact_name,
       contact_number: contact.contact_number,
       contact_email: contact.contact_email,
     });
   });
 
-  onContactRoleChange(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    this.contactModel.update((m) => ({ ...m, contact_role_id: value }));
-    this.contactRoleTouched.set(true);
-  }
-
   async save(): Promise<void> {
     const establishmentId = this.establishmentId();
     if (!establishmentId) return;
 
     await submit(this.contactForm, async () => {
-      this.contactRoleTouched.set(true);
-      if (this.contactModel().contact_role_id === 0) {
-        return;
-      }
-
       this.savingContact.set(true);
       this.contactError.set(null);
 
       try {
-        const payload: UpsertEstablishmentContactPayload = this.contactModel();
+        const payload: UpsertEstablishmentContactPayload = {
+          ...this.contactModel(),
+          contact_role_id: Number(this.contactModel().contact_role_id),
+        };
         await firstValueFrom(this.contactService.upsert(establishmentId, payload));
         this.saved.emit();
       } catch (error) {

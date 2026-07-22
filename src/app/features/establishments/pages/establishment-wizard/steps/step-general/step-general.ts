@@ -4,11 +4,11 @@ import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { catchError, firstValueFrom, of } from 'rxjs';
 import { EstablishmentService } from '../../../../services/establishment.service';
 import { EstablishmentCatalogsService } from '../../../../services/establishment-catalogs.service';
-import { DesignatedPerson, EstablishmentStatus, Plan, Turnover } from '../../../../models/establishment-model';
+import { CreateEstablishmentPayload, DesignatedPerson, EstablishmentStatus, Plan, Turnover } from '../../../../models/establishment-model';
 import { ESTABLISHMENT_STATUS_LABELS, ESTABLISHMENT_STATUS_OPTIONS } from '../../../../models/establishment-options';
 import { CoreModel } from '../../../../models/establishment-wizard-model';
 import { MEXICO_STATES, getMunicipalitiesByState } from '../../../../../../shared/data/mx-locations';
-import {exteriorNumberSchema,interiorNumberSchema,postalCodeSchema,requiredTextSchema,rfcSchema} from '../../../../../../shared/forms/field-schemas';
+import {exteriorNumberSchema,interiorNumberSchema,postalCodeSchema,requiredSelectSchema,requiredTextSchema,rfcSchema} from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
 function emptyCoreModel(): CoreModel {
@@ -16,7 +16,7 @@ function emptyCoreModel(): CoreModel {
     name: '',
     business_name: '',
     rfc: '',
-    turnover_id: 0,
+    turnover_id: '',
     street: '',
     neighborhood: '',
     ext_number: '',
@@ -25,7 +25,7 @@ function emptyCoreModel(): CoreModel {
     state: '',
     city: '',
     designated_person_id: '',
-    plan_id: 0,
+    plan_id: '',
     establishment_status: EstablishmentStatus.PROSPECT,
     comment: '',
   };
@@ -66,9 +66,9 @@ export class EstablishmentStepGeneral {
     apply(f.state, requiredTextSchema);
     apply(f.city, requiredTextSchema);
     apply(f.designated_person_id, requiredTextSchema);
+    apply(f.turnover_id, requiredSelectSchema);
+    apply(f.plan_id, requiredSelectSchema);
   });
-  readonly turnoverTouched = signal(false);
-  readonly planTouched = signal(false);
   readonly savingCore = signal(false);
   readonly coreError = signal<string | null>(null);
 
@@ -92,7 +92,7 @@ export class EstablishmentStepGeneral {
       name: establishment.name,
       business_name: establishment.business_name,
       rfc: establishment.rfc,
-      turnover_id: establishment.turnover.id,
+      turnover_id: String(establishment.turnover.id),
       street: establishment.street,
       neighborhood: establishment.neighborhood,
       ext_number: establishment.ext_number,
@@ -101,37 +101,23 @@ export class EstablishmentStepGeneral {
       state: establishment.state,
       city: establishment.city,
       designated_person_id: establishment.designated_person.id,
-      plan_id: establishment.plan.id,
+      plan_id: String(establishment.plan.id),
       establishment_status: establishment.establishment_status,
       comment: establishment.comment ?? '',
     });
   });
 
-  onTurnoverChange(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    this.coreModel.update((m) => ({ ...m, turnover_id: value }));
-    this.turnoverTouched.set(true);
-  }
-
-  onPlanChange(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    this.coreModel.update((m) => ({ ...m, plan_id: value }));
-    this.planTouched.set(true);
-  }
-
   async save(): Promise<void> {
     await submit(this.coreForm, async () => {
-      this.turnoverTouched.set(true);
-      this.planTouched.set(true);
-      if (this.coreModel().turnover_id === 0 || this.coreModel().plan_id === 0) {
-        return;
-      }
-
       this.savingCore.set(true);
       this.coreError.set(null);
 
       try {
-        const payload = this.coreModel();
+        const payload: CreateEstablishmentPayload = {
+          ...this.coreModel(),
+          turnover_id: Number(this.coreModel().turnover_id),
+          plan_id: Number(this.coreModel().plan_id),
+        };
         const existingId = this.establishmentId();
         const establishment = existingId
           ? await firstValueFrom(this.establishmentService.update(existingId, payload))

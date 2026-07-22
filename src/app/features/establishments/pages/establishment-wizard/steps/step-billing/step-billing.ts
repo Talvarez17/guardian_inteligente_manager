@@ -6,11 +6,11 @@ import { EstablishmentBillingService } from '../../../../services/establishment-
 import { EstablishmentCatalogsService } from '../../../../services/establishment-catalogs.service';
 import { PaymentForm, PaymentMethod, UpsertEstablishmentBillingPayload } from '../../../../models/establishment-billing-model';
 import { BillingModel } from '../../../../models/establishment-wizard-model';
-import { strictlyPositiveNumberSchema } from '../../../../../../shared/forms/field-schemas';
+import { requiredSelectSchema, strictlyPositiveNumberSchema } from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
 function emptyBillingModel(): BillingModel {
-  return { monthly_bill: 0, payment_method_id: 0, payment_form_id: 0 };
+  return { monthly_bill: 0, payment_method_id: '', payment_form_id: '' };
 }
 
 @Component({
@@ -30,11 +30,13 @@ export class EstablishmentStepBilling {
   readonly paymentForms = toSignal(this.catalogs.getPaymentForms(), { initialValue: [] as PaymentForm[] });
 
   readonly billingModel = signal<BillingModel>(emptyBillingModel());
+
   readonly billingForm = form(this.billingModel, (f) => {
     apply(f.monthly_bill, strictlyPositiveNumberSchema);
+    apply(f.payment_method_id, requiredSelectSchema);
+    apply(f.payment_form_id, requiredSelectSchema);
   });
-  readonly paymentMethodTouched = signal(false);
-  readonly paymentFormTouched = signal(false);
+  
   readonly savingBilling = signal(false);
   readonly billingError = signal<string | null>(null);
 
@@ -48,41 +50,25 @@ export class EstablishmentStepBilling {
     if (!billing) return;
     this.billingModel.set({
       monthly_bill: billing.monthly_bill,
-      payment_method_id: billing.payment_method.id,
-      payment_form_id: billing.payment_form.id,
+      payment_method_id: String(billing.payment_method.id),
+      payment_form_id: String(billing.payment_form.id),
     });
   });
-
-  onPaymentMethodChange(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    this.billingModel.update((m) => ({ ...m, payment_method_id: value }));
-    this.paymentMethodTouched.set(true);
-  }
-
-  onPaymentFormChange(event: Event): void {
-    const value = Number((event.target as HTMLSelectElement).value);
-    this.billingModel.update((m) => ({ ...m, payment_form_id: value }));
-    this.paymentFormTouched.set(true);
-  }
 
   async save(): Promise<void> {
     const establishmentId = this.establishmentId();
     if (!establishmentId) return;
 
     await submit(this.billingForm, async () => {
-
-      this.paymentMethodTouched.set(true);
-      this.paymentFormTouched.set(true);
-
-      if (this.billingModel().payment_method_id === 0 || this.billingModel().payment_form_id === 0) {
-        return;
-      }
-
       this.savingBilling.set(true);
       this.billingError.set(null);
 
       try {
-        const payload: UpsertEstablishmentBillingPayload = this.billingModel();
+        const payload: UpsertEstablishmentBillingPayload = {
+          ...this.billingModel(),
+          payment_method_id: Number(this.billingModel().payment_method_id),
+          payment_form_id: Number(this.billingModel().payment_form_id),
+        };
         await firstValueFrom(this.billingService.upsert(establishmentId, payload));
         this.saved.emit();
       } catch (error) {

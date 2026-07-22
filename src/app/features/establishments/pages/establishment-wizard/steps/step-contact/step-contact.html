@@ -4,14 +4,14 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <label class="fieldset">
         <span class="label text-xs">Rol del contacto</span>
-        <select class="select w-full" [value]="contactModel().contact_role_id || ''" (change)="onContactRoleChange($event)">
+        <select class="select w-full" [formField]="contactForm.contact_role_id">
           <option value="" disabled>Selecciona un rol</option>
           @for (role of clientRoles(); track role.id) {
           <option [value]="role.id">{{ role.name }}</option>
           }
         </select>
-        @if (contactRoleTouched() && contactModel().contact_role_id === 0) {
-        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        @if (contactForm.contact_role_id().invalid() && contactForm.contact_role_id().touched()) {
+        <p class="text-error text-xs mt-1">{{ contactForm.contact_role_id().errors()[0].message }}</p>
         }
       </label>
 

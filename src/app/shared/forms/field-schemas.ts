@@ -19,6 +19,10 @@ export const requiredTextSchema = schema<string>((field) => {
   minLength(field, 2, { message: 'Este campo debe tener al menos 2 caracteres' });
 });
 
+export const requiredSelectSchema = schema<string>((field) => {
+  required(field, { message: 'Debes seleccionar una opción' });
+});
+
 export const positiveNumberSchema = schema<number>((field) => {
   required(field, { message: 'Este campo es requerido' });
   min(field, 0, { message: 'El valor no puede ser negativo' });

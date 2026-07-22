@@ -7,7 +7,7 @@ export interface CoreModel {
   name: string;
   business_name: string;
   rfc: string;
-  turnover_id: number;
+  turnover_id: string;
   street: string;
   neighborhood: string;
   ext_number: string;
@@ -16,13 +16,13 @@ export interface CoreModel {
   state: string;
   city: string;
   designated_person_id: string;
-  plan_id: number;
+  plan_id: string;
   establishment_status: EstablishmentStatus;
   comment: string;
 }
 
 export interface ContactModel {
-  contact_role_id: number;
+  contact_role_id: string;
   contact_name: string;
   contact_number: string;
   contact_email: string;
@@ -43,8 +43,8 @@ export interface OperationModel {
 
 export interface BillingModel {
   monthly_bill: number;
-  payment_method_id: number;
-  payment_form_id: number;
+  payment_method_id: string;
+  payment_form_id: string;
 }
 
 export interface ChecklistRowState {

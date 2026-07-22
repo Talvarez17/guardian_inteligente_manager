@@ -28,27 +28,27 @@
 
       <label class="fieldset">
         <span class="label text-xs">Giro comercial</span>
-        <select class="select w-full" [value]="coreModel().turnover_id || ''" (change)="onTurnoverChange($event)">
+        <select class="select w-full" [formField]="coreForm.turnover_id">
           <option value="" disabled>Selecciona un giro</option>
           @for (turnover of turnovers(); track turnover.id) {
           <option [value]="turnover.id">{{ turnover.name }}</option>
           }
         </select>
-        @if (turnoverTouched() && coreModel().turnover_id === 0) {
-        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        @if (coreForm.turnover_id().invalid() && coreForm.turnover_id().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.turnover_id().errors()[0].message }}</p>
         }
       </label>
 
       <label class="fieldset">
         <span class="label text-xs">Plan contratado</span>
-        <select class="select w-full" [value]="coreModel().plan_id || ''" (change)="onPlanChange($event)">
+        <select class="select w-full" [formField]="coreForm.plan_id">
           <option value="" disabled>Selecciona un plan</option>
           @for (plan of plans(); track plan.id) {
           <option [value]="plan.id">{{ plan.name }}</option>
           }
         </select>
-        @if (planTouched() && coreModel().plan_id === 0) {
-        <p class="text-error text-xs mt-1">Debes seleccionar una opción</p>
+        @if (coreForm.plan_id().invalid() && coreForm.plan_id().touched()) {
+        <p class="text-error text-xs mt-1">{{ coreForm.plan_id().errors()[0].message }}</p>
         }
       </label>
 

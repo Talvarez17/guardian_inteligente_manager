@@ -23,42 +23,37 @@ export class EstablishmentCatalogsService {
   }
 
   getDesignatedPersons(): Observable<DesignatedPerson[]> {
-    return this.http
-      .get<PaginatedResponse<DesignatedPerson>>(`${environment.apiUrl}/users/getAll`, {
-        params: { limit: CATALOG_PAGE_LIMIT },
-      })
+    return this.http.get<PaginatedResponse<DesignatedPerson>>(`${environment.apiUrl}/users/getAll`, {
+      params: { limit: CATALOG_PAGE_LIMIT },
+    })
       .pipe(map((response) => response.data));
   }
 
   getClientRoles(): Observable<ClientRole[]> {
-    return this.http
-      .get<PaginatedResponse<ClientRole>>(`${environment.apiUrl}/client-roles/getClientRoles`, {
-        params: { limit: CATALOG_PAGE_LIMIT },
-      })
+    return this.http.get<PaginatedResponse<ClientRole>>(`${environment.apiUrl}/client-roles/getClientRoles`, {
+      params: { limit: CATALOG_PAGE_LIMIT },
+    })
       .pipe(map((response) => response.data));
   }
 
   getPaymentMethods(): Observable<PaymentMethod[]> {
-    return this.http
-      .get<PaginatedResponse<PaymentMethod>>(`${environment.apiUrl}/payment-methods/getPaymentMethods`, {
-        params: { limit: CATALOG_PAGE_LIMIT },
-      })
+    return this.http.get<PaginatedResponse<PaymentMethod>>(`${environment.apiUrl}/payment-methods/getPaymentMethods`, {
+      params: { limit: CATALOG_PAGE_LIMIT },
+    })
       .pipe(map((response) => response.data));
   }
 
   getPaymentForms(): Observable<PaymentForm[]> {
-    return this.http
-      .get<PaginatedResponse<PaymentForm>>(`${environment.apiUrl}/payment-forms/getPaymentForms`, {
-        params: { limit: CATALOG_PAGE_LIMIT },
-      })
+    return this.http.get<PaginatedResponse<PaymentForm>>(`${environment.apiUrl}/payment-forms/getPaymentForms`, {
+      params: { limit: CATALOG_PAGE_LIMIT },
+    })
       .pipe(map((response) => response.data));
   }
 
   getChecklistItemTypes(): Observable<ChecklistItemType[]> {
-    return this.http
-      .get<PaginatedResponse<ChecklistItemType>>(`${environment.apiUrl}/checklist-item-types/getChecklistItemTypes`, {
-        params: { limit: CATALOG_PAGE_LIMIT },
-      })
+    return this.http.get<PaginatedResponse<ChecklistItemType>>(`${environment.apiUrl}/checklist-item-types/getChecklistItemTypes`, {
+      params: { limit: CATALOG_PAGE_LIMIT },
+    })
       .pipe(map((response) => response.data));
   }
 }
