@@ -14,10 +14,34 @@
   </div>
 </section>
 
-<section class="flex flex-col gap-3 mt-6 mb-6">
+<section class="flex flex-col gap-3 mt-6">
   <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/50">Catálogos de planes y sistema</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <app-catalog-crud [adapter]="planFeatureCatalog" viewAllRoute="/gestion/catalogos/plan-feature" />
     <app-catalog-crud [adapter]="roleCatalog" viewAllRoute="/gestion/catalogos/roles" />
+  </div>
+</section>
+
+<section class="flex flex-col gap-3 mt-6 mb-6">
+  <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/50">Catálogos documentales</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <a routerLink="/gestion/areas-documentales" class="card card-sm shadow-sm bg-base-100 hover:shadow-md transition-shadow">
+      <div class="card-body gap-1">
+        <h3 class="font-bold text-base-content flex items-center gap-2">
+          <i class="material-symbols-rounded text-[18px]! text-primary">folder</i>
+          Áreas documentales
+        </h3>
+        <p class="text-xs text-base-content/60">Clasifica los documentos por área (fiscal, legal, operativo...) con color e identificador.</p>
+      </div>
+    </a>
+    <a routerLink="/gestion/tipos-documento" class="card card-sm shadow-sm bg-base-100 hover:shadow-md transition-shadow">
+      <div class="card-body gap-1">
+        <h3 class="font-bold text-base-content flex items-center gap-2">
+          <i class="material-symbols-rounded text-[18px]! text-primary">description</i>
+          Tipos de documento
+        </h3>
+        <p class="text-xs text-base-content/60">Define los tipos de documento disponibles, su área y su vigencia por defecto.</p>
+      </div>
+    </a>
   </div>
 </section>

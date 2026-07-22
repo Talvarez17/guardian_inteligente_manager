@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CatalogCrud } from '../../components/catalog-crud/catalog-crud';
 import { TurnoverCatalogService } from '../../services/turnover-catalog.service';
 import { ClientRoleCatalogService } from '../../services/client-role-catalog.service';
@@ -10,7 +11,7 @@ import { RoleCatalogService } from '../../services/role-catalog.service';
 
 @Component({
   selector: 'app-management',
-  imports: [CatalogCrud],
+  imports: [RouterLink, CatalogCrud],
   templateUrl: './management.html',
 })
 export class Management {

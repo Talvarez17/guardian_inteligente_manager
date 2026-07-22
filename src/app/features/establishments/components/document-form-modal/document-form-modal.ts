@@ -1,12 +1,16 @@
-import { Component, computed, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, input, signal, viewChild } from '@angular/core';
-import { FormField, apply, form } from '@angular/forms/signals';
+import { Component, computed, CUSTOM_ELEMENTS_SCHEMA, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormField, apply, form, submit } from '@angular/forms/signals';
+import { firstValueFrom, map } from 'rxjs';
 import 'cally';
-import { DocumentModel } from '../../models/document-model';
-import { DOCUMENT_AREA_OPTIONS, DOCUMENT_STATUS_OPTIONS } from '../../models/document-options';
-import { DocumentsStore } from '../../services/documents-store';
-import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
+import { DocumentService } from '../../services/document.service';
+import { DocumentalAreaService } from '../../../management/services/documental-area.service';
+import { DocumentalArea } from '../../../management/models/documental-area-model';
+import { CreateDocumentPayload, Document, DocumentFormModel, UpdateDocumentPayload } from '../../models/document-model';
+import { requiredSelectSchema, requiredTextSchema } from '../../../../shared/forms/field-schemas';
+import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
-type DocumentFormModel = Omit<DocumentModel, 'id' | 'establishmentId'>;
+const AREA_OPTIONS_LIMIT = 100;
 
 @Component({
   selector: 'app-document-form-modal',
@@ -15,50 +19,59 @@ type DocumentFormModel = Omit<DocumentModel, 'id' | 'establishmentId'>;
   templateUrl: './document-form-modal.html',
 })
 export class DocumentFormModal {
-  private readonly store = inject(DocumentsStore);
+  private readonly documentService = inject(DocumentService);
+  private readonly documentalAreaService = inject(DocumentalAreaService);
 
   readonly establishmentId = input.required<string>();
+  readonly saved = output<void>();
 
-  readonly areaOptions = DOCUMENT_AREA_OPTIONS;
-  readonly statusOptions = DOCUMENT_STATUS_OPTIONS;
+  readonly areas = toSignal(
+    this.documentalAreaService.findAll({ limit: AREA_OPTIONS_LIMIT }).pipe(map((response) => response.data)),
+    { initialValue: [] as DocumentalArea[] },
+  );
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
 
-  readonly editingId = signal<string | null>(null);
+  readonly editingId = signal<number | null>(null);
+  readonly existingFileUrl = signal<string | null>(null);
+  readonly selectedFile = signal<File | null>(null);
+  readonly fileTouched = signal(false);
   readonly expirationTouched = signal(false);
-  readonly model = signal<DocumentFormModel>({
-    name: '',
-    area: DOCUMENT_AREA_OPTIONS[0],
-    version: '',
-    status: DOCUMENT_STATUS_OPTIONS[0],
-    expirationDate: '',
-    notes: '',
-    fileName: '',
-  });
+  readonly saving = signal(false);
+  readonly formError = signal<string | null>(null);
+
+  readonly model = signal<DocumentFormModel>({ name: '', area_id: '', version: '', expiration_date: '', comments: '' });
   
   readonly documentForm = form(this.model, (f) => {
     apply(f.name, requiredTextSchema);
+    apply(f.area_id, requiredSelectSchema);
+    apply(f.version, requiredTextSchema);
   });
 
-  readonly expirationInvalid = computed(() => this.expirationTouched() && !this.model().expirationDate);
+  readonly expirationInvalid = computed(() => this.expirationTouched() && !this.model().expiration_date);
+  readonly fileInvalid = computed(() => this.fileTouched() && !this.editingId() && !this.selectedFile());
+  readonly selectedFileName = computed(() => this.selectedFile()?.name ?? null);
 
-  open(document?: DocumentModel): void {
+  open(document?: Document): void {
     this.expirationTouched.set(false);
+    this.fileTouched.set(false);
+    this.selectedFile.set(null);
+    this.formError.set(null);
+
     if (document) {
-      const { id, establishmentId, ...rest } = document;
-      this.editingId.set(id);
-      this.model.set(rest);
+      this.editingId.set(document.id);
+      this.existingFileUrl.set(document.url);
+      this.model.set({
+        name: document.name,
+        area_id: String(document.area.id),
+        version: document.version,
+        expiration_date: document.expiration_date,
+        comments: document.comments ?? '',
+      });
     } else {
       this.editingId.set(null);
-      this.model.set({
-        name: '',
-        area: DOCUMENT_AREA_OPTIONS[0],
-        version: '',
-        status: DOCUMENT_STATUS_OPTIONS[0],
-        expirationDate: '',
-        notes: '',
-        fileName: '',
-      });
+      this.existingFileUrl.set(null);
+      this.model.set({ name: '', area_id: '', version: '', expiration_date: '', comments: '' });
     }
     this.dialogRef().nativeElement.showModal();
   }
@@ -69,30 +82,53 @@ export class DocumentFormModal {
 
   onExpirationChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.model.update((current) => ({ ...current, expirationDate: value }));
+    this.model.update((current) => ({ ...current, expiration_date: value }));
     this.expirationTouched.set(true);
   }
 
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
+    this.fileTouched.set(true);
     if (file) {
-      this.model.update((current) => ({ ...current, fileName: file.name }));
+      this.selectedFile.set(file);
     }
   }
 
-  save(): void {
+  async save(): Promise<void> {
     this.expirationTouched.set(true);
-    if (this.documentForm().invalid() || !this.model().expirationDate) {
-      this.documentForm().markAsTouched();
-      return;
-    }
+    this.fileTouched.set(true);
 
-    const editingId = this.editingId();
-    if (editingId) {
-      this.store.update(editingId, { establishmentId: this.establishmentId(), ...this.model() });
-    } else {
-      this.store.add({ id: crypto.randomUUID(), establishmentId: this.establishmentId(), ...this.model() });
-    }
-    this.close();
+    await submit(this.documentForm, async () => {
+      if (!this.model().expiration_date || this.fileInvalid()) {
+        return;
+      }
+
+      this.saving.set(true);
+      this.formError.set(null);
+
+      try {
+        const editingId = this.editingId();
+        const file = this.selectedFile() ?? undefined;
+
+        if (editingId) {
+          const payload: UpdateDocumentPayload = { ...this.model(), area_id: Number(this.model().area_id) };
+          await firstValueFrom(this.documentService.update(editingId, payload, file));
+        } else {
+          const payload: CreateDocumentPayload = {
+            establishment_id: this.establishmentId(),
+            ...this.model(),
+            area_id: Number(this.model().area_id),
+          };
+          await firstValueFrom(this.documentService.create(payload, file!));
+        }
+
+        this.saved.emit();
+        this.close();
+      } catch (error) {
+        this.formError.set(resolveErrorMessage(error, 'No se pudo guardar el documento.'));
+      } finally {
+        this.saving.set(false);
+      }
+    });
   }
 }

@@ -11,7 +11,9 @@
       </button>
     </div>
 
-    @if (documents().length) {
+    @if (loading()) {
+    <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
+    } @else if (documents().length) {
     <div class="overflow-x-auto">
       <table class="table">
         <thead>
@@ -29,20 +31,31 @@
           <tr>
             <td>
               <p class="font-semibold text-base-content">{{ item.name }}</p>
-              <p class="text-xs text-base-content/50">{{ item.fileName }}</p>
+              @if (item.comments) {
+              <p class="text-xs text-base-content/50">{{ item.comments }}</p>
+              }
             </td>
-            <td>{{ item.area }}</td>
+            <td>{{ item.area.area }}</td>
             <td>{{ item.version }}</td>
-            <td><span class="badge badge-soft" [class]="statusBadgeClass(item.status)">{{ item.status }}</span></td>
-            <td>{{ item.expirationDate }}</td>
+            <td>
+              <span class="badge badge-soft" [class]="statusBadgeClass(computedStatus(item))">
+                {{ statusLabel(computedStatus(item)) }}
+              </span>
+            </td>
+            <td>{{ item.expiration_date }}</td>
             <td>
               <div class="join">
                 <button type="button" class="btn btn-outline btn-primary btn-sm join-item" (click)="openEdit(item)">
                   <i class="material-symbols-rounded text-[16px]!">edit</i>
                   Editar
                 </button>
-                <button type="button" class="btn btn-outline btn-error btn-sm join-item" (click)="removeDocument(item)">
+                <button type="button" class="btn btn-outline btn-error btn-sm join-item" [disabled]="removingId() === item.id"
+                  (click)="removeDocument(item)">
+                  @if (removingId() === item.id) {
+                  <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
                   <i class="material-symbols-rounded text-[16px]!">delete</i>
+                  }
                   Eliminar
                 </button>
               </div>
@@ -58,4 +71,4 @@
   </div>
 </div>
 
-<app-document-form-modal [establishmentId]="establishmentId()" />
+<app-document-form-modal [establishmentId]="establishmentId()" (saved)="onSaved()" />
