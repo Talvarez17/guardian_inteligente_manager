@@ -10,21 +10,6 @@ import { OperationModel } from '../../../../models/establishment-wizard-model';
 import { positiveNumberSchema } from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
-function emptyOperationModel(): OperationModel {
-  return {
-    risk: EstablishmentRisk.LOW,
-    risk_factor: '',
-    gia: false,
-    covia: false,
-    ria: false,
-    inactive_factor: '',
-    cameras: 0,
-    closing_date: '',
-    install_date: '',
-    real_install_date: '',
-  };
-}
-
 @Component({
   selector: 'app-establishment-step-operation',
   imports: [FormField],
@@ -40,10 +25,23 @@ export class EstablishmentStepOperation {
   readonly riskOptions = ESTABLISHMENT_RISK_OPTIONS;
   readonly riskLabels = ESTABLISHMENT_RISK_LABELS;
 
-  readonly operationModel = signal<OperationModel>(emptyOperationModel());
+  readonly operationModel = signal<OperationModel>({
+    risk: EstablishmentRisk.LOW,
+    risk_factor: '',
+    gia: false,
+    covia: false,
+    ria: false,
+    inactive_factor: '',
+    cameras: 0,
+    closing_date: '',
+    install_date: '',
+    real_install_date: '',
+  });
+
   readonly operationForm = form(this.operationModel, (f) => {
     apply(f.cameras, positiveNumberSchema);
   });
+  
   readonly savingOperation = signal(false);
   readonly operationError = signal<string | null>(null);
 

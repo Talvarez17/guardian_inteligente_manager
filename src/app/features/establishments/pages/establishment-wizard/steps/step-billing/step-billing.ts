@@ -9,10 +9,6 @@ import { BillingModel } from '../../../../models/establishment-wizard-model';
 import { requiredSelectSchema, strictlyPositiveNumberSchema } from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
-function emptyBillingModel(): BillingModel {
-  return { monthly_bill: 0, payment_method_id: '', payment_form_id: '' };
-}
-
 @Component({
   selector: 'app-establishment-step-billing',
   imports: [FormField],
@@ -29,8 +25,12 @@ export class EstablishmentStepBilling {
   readonly paymentMethods = toSignal(this.catalogs.getPaymentMethods(), { initialValue: [] as PaymentMethod[] });
   readonly paymentForms = toSignal(this.catalogs.getPaymentForms(), { initialValue: [] as PaymentForm[] });
 
-  readonly billingModel = signal<BillingModel>(emptyBillingModel());
-
+  readonly billingModel = signal<BillingModel>({
+    monthly_bill: 0,
+    payment_method_id: '',
+    payment_form_id: '',
+  });
+  
   readonly billingForm = form(this.billingModel, (f) => {
     apply(f.monthly_bill, strictlyPositiveNumberSchema);
     apply(f.payment_method_id, requiredSelectSchema);

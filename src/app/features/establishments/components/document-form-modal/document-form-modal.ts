@@ -8,18 +8,6 @@ import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
 
 type DocumentFormModel = Omit<DocumentModel, 'id' | 'establishmentId'>;
 
-function emptyModel(): DocumentFormModel {
-  return {
-    name: '',
-    area: DOCUMENT_AREA_OPTIONS[0],
-    version: '',
-    status: DOCUMENT_STATUS_OPTIONS[0],
-    expirationDate: '',
-    notes: '',
-    fileName: '',
-  };
-}
-
 @Component({
   selector: 'app-document-form-modal',
   imports: [FormField],
@@ -38,8 +26,16 @@ export class DocumentFormModal {
 
   readonly editingId = signal<string | null>(null);
   readonly expirationTouched = signal(false);
-  readonly model = signal<DocumentFormModel>(emptyModel());
-
+  readonly model = signal<DocumentFormModel>({
+    name: '',
+    area: DOCUMENT_AREA_OPTIONS[0],
+    version: '',
+    status: DOCUMENT_STATUS_OPTIONS[0],
+    expirationDate: '',
+    notes: '',
+    fileName: '',
+  });
+  
   readonly documentForm = form(this.model, (f) => {
     apply(f.name, requiredTextSchema);
   });
@@ -54,7 +50,15 @@ export class DocumentFormModal {
       this.model.set(rest);
     } else {
       this.editingId.set(null);
-      this.model.set(emptyModel());
+      this.model.set({
+        name: '',
+        area: DOCUMENT_AREA_OPTIONS[0],
+        version: '',
+        status: DOCUMENT_STATUS_OPTIONS[0],
+        expirationDate: '',
+        notes: '',
+        fileName: '',
+      });
     }
     this.dialogRef().nativeElement.showModal();
   }

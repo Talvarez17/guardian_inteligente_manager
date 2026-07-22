@@ -11,26 +11,6 @@ import { MEXICO_STATES, getMunicipalitiesByState } from '../../../../../../share
 import {exteriorNumberSchema,interiorNumberSchema,postalCodeSchema,requiredSelectSchema,requiredTextSchema,rfcSchema} from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
-function emptyCoreModel(): CoreModel {
-  return {
-    name: '',
-    business_name: '',
-    rfc: '',
-    turnover_id: '',
-    street: '',
-    neighborhood: '',
-    ext_number: '',
-    int_number: '',
-    postal_code: '',
-    state: '',
-    city: '',
-    designated_person_id: '',
-    plan_id: '',
-    establishment_status: EstablishmentStatus.PROSPECT,
-    comment: '',
-  };
-}
-
 @Component({
   selector: 'app-establishment-step-general',
   imports: [FormField],
@@ -53,7 +33,24 @@ export class EstablishmentStepGeneral {
   readonly turnovers = toSignal(this.catalogs.getTurnovers(), { initialValue: [] as Turnover[] });
   readonly designatedPersons = toSignal(this.catalogs.getDesignatedPersons(), { initialValue: [] as DesignatedPerson[] });
 
-  readonly coreModel = signal<CoreModel>(emptyCoreModel());
+  readonly coreModel = signal<CoreModel>({
+    name: '',
+    business_name: '',
+    rfc: '',
+    turnover_id: '',
+    street: '',
+    neighborhood: '',
+    ext_number: '',
+    int_number: '',
+    postal_code: '',
+    state: '',
+    city: '',
+    designated_person_id: '',
+    plan_id: '',
+    establishment_status: EstablishmentStatus.PROSPECT,
+    comment: '',
+  });
+
   readonly coreForm = form(this.coreModel, (f) => {
     apply(f.name, requiredTextSchema);
     apply(f.business_name, requiredTextSchema);
@@ -69,6 +66,7 @@ export class EstablishmentStepGeneral {
     apply(f.turnover_id, requiredSelectSchema);
     apply(f.plan_id, requiredSelectSchema);
   });
+  
   readonly savingCore = signal(false);
   readonly coreError = signal<string | null>(null);
 

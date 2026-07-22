@@ -9,10 +9,6 @@ import { ContactModel } from '../../../../models/establishment-wizard-model';
 import { emailSchema, phoneSchema, requiredSelectSchema, requiredTextSchema } from '../../../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../../../shared/utils/resolve-error-message';
 
-function emptyContactModel(): ContactModel {
-  return { contact_role_id: '', contact_name: '', contact_number: '', contact_email: '' };
-}
-
 @Component({
   selector: 'app-establishment-step-contact',
   imports: [FormField],
@@ -28,7 +24,13 @@ export class EstablishmentStepContact {
 
   readonly clientRoles = toSignal(this.catalogs.getClientRoles(), { initialValue: [] as ClientRole[] });
 
-  readonly contactModel = signal<ContactModel>(emptyContactModel());
+  readonly contactModel = signal<ContactModel>({
+    contact_role_id: '',
+    contact_name: '',
+    contact_number: '',
+    contact_email: '',
+  });
+  
   readonly contactForm = form(this.contactModel, (f) => {
     apply(f.contact_name, requiredTextSchema);
     apply(f.contact_number, phoneSchema);

@@ -18,12 +18,6 @@ import { DocumentsPanel } from '../../components/documents-panel/documents-panel
 import { monthSchema, requiredTextSchema, strictlyPositiveNumberSchema, yearSchema } from '../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
-const CURRENT_YEAR = new Date().getFullYear();
-
-function emptyPaymentModel(): PaymentFormModel {
-  return { period_month: new Date().getMonth() + 1, period_year: CURRENT_YEAR, folio: '', amount: 0 };
-}
-
 @Component({
   selector: 'app-establishment-detail',
   imports: [RouterLink, CurrencyPipe, DocumentsPanel, FormField],
@@ -95,8 +89,13 @@ export class EstablishmentDetail {
   readonly savingPayment = signal(false);
   readonly paymentError = signal<string | null>(null);
 
-  readonly paymentModel = signal<PaymentFormModel>(emptyPaymentModel());
-
+  readonly paymentModel = signal<PaymentFormModel>({
+    period_month: new Date().getMonth() + 1,
+    period_year: new Date().getFullYear(),
+    folio: '',
+    amount: 0,
+  });
+  
   readonly paymentForm = form(this.paymentModel, (f) => {
     apply(f.folio, requiredTextSchema);
     apply(f.amount, strictlyPositiveNumberSchema);
@@ -113,7 +112,12 @@ export class EstablishmentDetail {
 
       try {
         await firstValueFrom(this.paymentRecordService.create(payload));
-        this.paymentModel.set(emptyPaymentModel());
+        this.paymentModel.set({
+          period_month: new Date().getMonth() + 1,
+          period_year: new Date().getFullYear(),
+          folio: '',
+          amount: 0,
+        });
         this.paymentRecordsResource.reload();
         this.paymentSummaryResource.reload();
       } catch (error) {

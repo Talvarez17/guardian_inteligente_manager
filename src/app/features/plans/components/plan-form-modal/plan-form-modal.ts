@@ -10,10 +10,6 @@ import { CatalogItem } from '../../../management/models/catalog-crud-model';
 import { positiveNumberSchema, requiredTextSchema } from '../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
-function emptyModel(): PlanFormValue {
-  return { name: '', amount: 0, frequency: 'Mensual', trial: 0, tries: 3, comments: '' };
-}
-
 @Component({
   selector: 'app-plan-form-modal',
   imports: [FormField],
@@ -34,16 +30,15 @@ export class PlanFormModal {
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
 
   readonly editingId = signal<number | null>(null);
-  readonly model = signal<PlanFormValue>(emptyModel());
-  readonly saving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
-
+  readonly model = signal<PlanFormValue>({ name: '', amount: 0, frequency: 'Mensual', trial: 0, tries: 3, comments: '' });
   readonly planForm = form(this.model, (f) => {
     apply(f.name, requiredTextSchema);
     apply(f.amount, positiveNumberSchema);
     apply(f.trial, positiveNumberSchema);
     apply(f.tries, positiveNumberSchema);
   });
+  readonly saving = signal(false);
+  readonly errorMessage = signal<string | null>(null);
 
   open(plan?: PlanModel): void {
     this.errorMessage.set(null);
@@ -61,7 +56,7 @@ export class PlanFormModal {
       this.selectedFeatureIds.set(plan.features.map((feature) => feature.id));
     } else {
       this.editingId.set(null);
-      this.model.set(emptyModel());
+      this.model.set({ name: '', amount: 0, frequency: 'Mensual', trial: 0, tries: 3, comments: '' });
       this.selectedFeatureIds.set([]);
     }
 
