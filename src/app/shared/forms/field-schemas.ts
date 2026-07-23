@@ -1,4 +1,4 @@
-import { email, max, maxLength, min, minLength, pattern, required, schema } from '@angular/forms/signals';
+import { email, max, maxLength, min, minLength, pattern, required, schema, validate } from '@angular/forms/signals';
 
 const RFC_PATTERN = /^[A-ZÑ&]{3}\d{6}[A-Z0-9]{3}$/;
 const STREET_NUMBER_PATTERN = /^[a-zA-Z0-9-]+$/;
@@ -58,6 +58,14 @@ export const postalCodeSchema = schema<string>((field) => {
 export const strictlyPositiveNumberSchema = schema<number>((field) => {
   required(field, { message: 'Este campo es requerido' });
   min(field, 0.01, { message: 'El valor debe ser mayor a 0' });
+});
+
+export const positiveIntegerSchema = schema<number>((field) => {
+  required(field, { message: 'Este campo es requerido' });
+  min(field, 1, { message: 'El valor debe ser mayor a 0' });
+  validate(field, ({ value }) =>
+    Number.isInteger(value()) ? undefined : { kind: 'integer', message: 'El valor debe ser un número entero, sin decimales' },
+  );
 });
 
 export const monthSchema = schema<number>((field) => {

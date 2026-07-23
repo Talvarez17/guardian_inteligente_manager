@@ -6,7 +6,7 @@ import { DocumentTypeService } from '../../services/document-type.service';
 import { DocumentalAreaService } from '../../services/documental-area.service';
 import { DocumentType, DocumentTypeFormModel } from '../../models/document-type-model';
 import { DocumentalArea } from '../../models/documental-area-model';
-import { requiredSelectSchema, requiredTextSchema, strictlyPositiveNumberSchema } from '../../../../shared/forms/field-schemas';
+import { positiveIntegerSchema, requiredSelectSchema, requiredTextSchema } from '../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
 const AREA_OPTIONS_LIMIT = 100;
@@ -38,7 +38,7 @@ export class DocumentTypeFormModal {
   readonly typeForm = form(this.typeModel, (f) => {
     apply(f.name, requiredTextSchema);
     apply(f.category_id, requiredSelectSchema);
-    apply(f.validity, strictlyPositiveNumberSchema);
+    apply(f.validity, positiveIntegerSchema);
   });
 
   open(item?: DocumentType): void {

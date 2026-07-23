@@ -51,42 +51,40 @@
         (input)="onSearchInput($event)" />
     </label>
 
-    <div class="overflow-x-auto">
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th>{{ adapter().label }}</th>
-            <th>Estatus</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (loading()) {
-          <tr><td colspan="3" class="text-center py-6"><span class="loading loading-spinner loading-sm"></span></td></tr>
-          } @else if (loadError()) {
-          <tr><td colspan="3" class="text-center text-error py-6">{{ loadError() }}</td></tr>
-          } @else {
-          @for (item of items(); track item.id) {
-          <tr>
-            <td class="font-medium text-base-content">{{ item.name }}</td>
-            <td>
-              <div class="tooltip" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
-                <input type="checkbox" class="toggle toggle-success" [checked]="item.status"
-                  [disabled]="togglingId() === item.id" (change)="toggleStatus(item)" />
-              </div>
-            </td>
-            <td>
-              <button type="button" class="btn btn-ghost btn-xs" (click)="openEdit(item)">
-                <i class="material-symbols-rounded text-[16px]!">edit</i>
-              </button>
-            </td>
-          </tr>
-          } @empty {
-          <tr><td colspan="3" class="text-center text-base-content/50 py-6">Sin registros.</td></tr>
-          }
-          }
-        </tbody>
-      </table>
+    <div class="flex flex-col gap-3">
+      @if (loading()) {
+      <div class="flex justify-center rounded-box border border-base-300 bg-base-100 py-8">
+        <span class="loading loading-spinner loading-sm"></span>
+      </div>
+      } @else if (loadError()) {
+      <p class="rounded-box border border-base-300 bg-base-100 py-8 text-center text-sm text-error">{{ loadError() }}</p>
+      } @else {
+      @for (item of items(); track item.id) {
+      <div
+        class="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-box border border-l-4 border-base-300 bg-base-100 p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+        [class]="item.status ? 'border-l-success' : 'border-l-base-300'">
+        <div class="flex size-9 items-center justify-center rounded-xl text-sm font-bold"
+          [class]="item.status ? 'bg-success/15 text-success' : 'bg-base-content/8 text-base-content/50'">
+          {{ item.name.charAt(0) }}
+        </div>
+
+        <p class="min-w-0 truncate font-semibold text-base-content">{{ item.name }}</p>
+
+        <div class="flex items-center gap-3 justify-self-end">
+          <div class="tooltip" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
+            <input type="checkbox" class="toggle toggle-success" [checked]="item.status"
+              [disabled]="togglingId() === item.id" (change)="toggleStatus(item)" />
+          </div>
+          <button type="button" title="Editar" (click)="openEdit(item)"
+            class="flex size-9 items-center justify-center rounded-full bg-primary/12 text-primary transition-colors hover:bg-primary/20">
+            <i class="material-symbols-rounded text-[18px]!">edit</i>
+          </button>
+        </div>
+      </div>
+      } @empty {
+      <div class="rounded-box border border-base-300 bg-base-100 py-8 text-center text-base-content/50">Sin registros.</div>
+      }
+      }
     </div>
 
     @if (meta(); as m) {

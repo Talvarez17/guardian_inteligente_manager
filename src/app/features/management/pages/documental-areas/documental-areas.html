@@ -3,89 +3,91 @@
     <h1 class="text-2xl font-bold text-base-content">Áreas documentales</h1>
     <p class="text-sm text-base-content/60">Administra las áreas que clasifican los tipos de documento y los documentos.</p>
   </div>
-  <a routerLink="/gestion" class="btn btn-ghost btn-sm">
-    <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
-    Volver a gestión
-  </a>
-</section>
-
-<section class="card bg-base-100 shadow-sm mt-5 mb-6">
-  <div class="card-body gap-3">
-    <div class="flex items-center justify-between gap-2">
-      <label class="input input-sm w-full max-w-xs">
-        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.3-4.3"></path>
-          </g>
-        </svg>
-        <input class="w-full" type="search" placeholder="Buscar área..." (input)="onSearchInput($event)" />
-      </label>
-      <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
-        <i class="material-symbols-rounded text-[16px]!">add</i>
-        Nueva área
-      </button>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th>Área</th>
-            <th>Descripción</th>
-            <th>Color</th>
-            <th>Estatus</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (loading()) {
-          <tr><td colspan="5" class="text-center py-6"><span class="loading loading-spinner loading-sm"></span></td></tr>
-          } @else if (loadError()) {
-          <tr><td colspan="5" class="text-center text-error py-6">{{ loadError() }}</td></tr>
-          } @else {
-          @for (item of items(); track item.id) {
-          <tr>
-            <td class="font-medium text-base-content">{{ item.area }}</td>
-            <td class="text-base-content/70">{{ item.description }}</td>
-            <td>
-              <div class="flex items-center gap-2">
-                <span class="inline-block size-4 rounded-full border border-base-content/10" [style.background-color]="item.color"></span>
-                <span class="text-xs text-base-content/60">{{ item.color }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="tooltip" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
-                <input type="checkbox" class="toggle toggle-success" [checked]="item.status"
-                  [disabled]="togglingId() === item.id" (change)="toggleStatus(item)" />
-              </div>
-            </td>
-            <td>
-              <button type="button" class="btn btn-ghost btn-xs" (click)="openEdit(item)">
-                <i class="material-symbols-rounded text-[16px]!">edit</i>
-              </button>
-            </td>
-          </tr>
-          } @empty {
-          <tr><td colspan="5" class="text-center text-base-content/50 py-6">Sin registros.</td></tr>
-          }
-          }
-        </tbody>
-      </table>
-    </div>
-
-    @if (meta(); as m) {
-    @if (m.totalPages > 1) {
-    <div class="flex justify-center">
-      <div class="join">
-        <button type="button" class="join-item btn btn-xs" [disabled]="m.page === 1" (click)="goToPage(m.page - 1)">«</button>
-        <button type="button" class="join-item btn btn-xs btn-disabled">Página {{ m.page }} de {{ m.totalPages }}</button>
-        <button type="button" class="join-item btn btn-xs" [disabled]="m.page === m.totalPages" (click)="goToPage(m.page + 1)">»</button>
-      </div>
-    </div>
-    }
-    }
+  <div class="flex gap-2">
+    <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
+      <i class="material-symbols-rounded text-[18px]!">add</i>
+      Nueva área
+    </button>
+    <a routerLink="/gestion" class="btn btn-ghost btn-sm">
+      <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
+      Volver a gestión
+    </a>
   </div>
 </section>
+
+<section class="flex flex-wrap items-center gap-3 mt-5">
+  <label class="input grow min-w-55">
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </g>
+    </svg>
+    <input class="w-full" type="search" placeholder="Buscar área..." (input)="onSearchInput($event)" />
+  </label>
+</section>
+
+<section class="flex flex-col gap-3 mt-4 mb-4">
+  @if (loading()) {
+  <div class="flex justify-center rounded-box border border-base-300 bg-base-100 py-10">
+    <span class="loading loading-spinner"></span>
+  </div>
+  } @else if (loadError()) {
+  <p class="rounded-box border border-base-300 bg-base-100 py-10 text-center text-sm text-error">{{ loadError() }}</p>
+  } @else {
+  @for (item of items(); track item.id) {
+  <div
+    class="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-box border border-l-4 border-base-300 bg-base-100 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+    [class]="item.status ? 'border-l-success' : 'border-l-base-300'">
+    <span class="size-10 shrink-0 rounded-xl border border-base-content/10" [style.background-color]="item.color"></span>
+
+    <div class="grid min-w-0 grid-cols-5 items-center gap-x-3 gap-y-0.5">
+      <div class="col-span-5 min-w-0 md:col-span-1">
+        <p class="font-semibold text-base-content truncate">{{ item.area }}</p>
+        <p class="text-xs" [class]="item.status ? 'text-success' : 'text-base-content/50'">{{ item.status ? 'Activo' :
+          'Inactivo' }}</p>
+      </div>
+
+      <div class="hidden min-w-0 md:block md:col-span-3">
+        <p class="text-[11px] uppercase tracking-wide text-base-content/40">Descripción</p>
+        <p class="text-sm truncate">{{ item.description }}</p>
+      </div>
+      <div class="hidden min-w-0 md:block md:col-span-1">
+        <p class="text-[11px] uppercase tracking-wide text-base-content/40">Color</p>
+        <p class="font-mono text-xs truncate">{{ item.color }}</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 justify-self-end">
+      <div class="tooltip" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
+        <input type="checkbox" class="toggle toggle-success" [checked]="item.status" [disabled]="togglingId() === item.id"
+          (change)="toggleStatus(item)" />
+      </div>
+      <button type="button" title="Editar" (click)="openEdit(item)"
+        class="flex size-9 items-center justify-center rounded-full bg-primary/12 text-primary transition-colors hover:bg-primary/20">
+        <i class="material-symbols-rounded text-[18px]!">edit</i>
+      </button>
+    </div>
+  </div>
+  } @empty {
+  <div class="rounded-box border border-base-300 bg-base-100 py-10 text-center text-base-content/50">Sin registros.</div>
+  }
+  }
+</section>
+
+@if (meta(); as m) {
+@if (m.totalPages > 1) {
+<section class="flex justify-center mb-6">
+  <div class="join">
+    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === 1" (click)="goToPage(m.page - 1)">«</button>
+    <button type="button" class="join-item btn btn-sm btn-disabled">Página {{ m.page }} de {{ m.totalPages }}</button>
+    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === m.totalPages"
+      (click)="goToPage(m.page + 1)">»</button>
+  </div>
+</section>
+} @else {
+<div class="mb-6"></div>
+}
+}
 
 <app-documental-area-form-modal (saved)="onSaved()" />

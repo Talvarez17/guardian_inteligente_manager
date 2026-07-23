@@ -25,7 +25,7 @@
 
       <label class="fieldset">
         <span class="label text-xs">Vigencia (meses)</span>
-        <input type="number" class="input w-full" [formField]="typeForm.validity" />
+        <input type="number" step="1" class="input w-full" [formField]="typeForm.validity" />
         @if (typeForm.validity().invalid() && typeForm.validity().touched()) {
         <p class="text-error text-xs mt-1">{{ typeForm.validity().errors()[0].message }}</p>
         }
