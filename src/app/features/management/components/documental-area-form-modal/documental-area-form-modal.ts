@@ -5,12 +5,13 @@ import { DocumentalAreaService } from '../../services/documental-area.service';
 import { DocumentalArea, DocumentalAreaFormModel } from '../../models/documental-area-model';
 import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
+import { ColorPicker } from '../../../../shared/ui/color-picker/color-picker';
 
 const EMPTY_MODEL: DocumentalAreaFormModel = { area: '', description: '', color: '#2563eb' };
 
 @Component({
   selector: 'app-documental-area-form-modal',
-  imports: [FormField],
+  imports: [FormField, ColorPicker],
   templateUrl: './documental-area-form-modal.html',
 })
 export class DocumentalAreaFormModal {

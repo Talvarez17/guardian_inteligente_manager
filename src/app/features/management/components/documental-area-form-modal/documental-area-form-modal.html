@@ -20,10 +20,7 @@
 
       <label class="fieldset">
         <span class="label text-xs">Color</span>
-        <div class="flex items-center gap-2">
-          <input type="color" class="input h-10 w-16 p-1" [formField]="areaForm.color" />
-          <span class="text-sm text-base-content/60">{{ areaModel().color }}</span>
-        </div>
+        <app-color-picker [formField]="areaForm.color" />
       </label>
 
       @if (formError()) {
