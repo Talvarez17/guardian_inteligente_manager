@@ -1,32 +1,21 @@
-import { Component, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormField, apply, form, submit } from '@angular/forms/signals';
+import { RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { DocumentalAreaService } from '../../services/documental-area.service';
-import { DocumentalArea, DocumentalAreaFormModel } from '../../models/documental-area-model';
-import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
-import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
+import { DocumentalArea } from '../../models/documental-area-model';
+import { DocumentalAreaFormModal } from '../../components/documental-area-form-modal/documental-area-form-modal';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-documental-areas',
-  imports: [RouterLink, FormField],
+  imports: [RouterLink, DocumentalAreaFormModal],
   templateUrl: './documental-areas.html',
 })
 export class DocumentalAreas {
   private readonly documentalAreaService = inject(DocumentalAreaService);
-  private readonly route = inject(ActivatedRoute);
-
-  constructor() {
-    afterNextRender(() => {
-      if (this.route.snapshot.queryParamMap.has('create')) {
-        this.openCreate();
-      }
-    });
-  }
 
   readonly search = signal('');
   readonly page = signal(1);
@@ -55,18 +44,9 @@ export class DocumentalAreas {
     return result && !result.ok ? 'No se pudo cargar la información.' : null;
   });
 
-  private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
-
-  readonly editingId = signal<number | null>(null);
-  readonly saving = signal(false);
-  readonly formError = signal<string | null>(null);
   readonly togglingId = signal<number | null>(null);
 
-  readonly areaModel = signal<DocumentalAreaFormModel>({ area: '', description: '', color: '#2563eb' });
-  readonly areaForm = form(this.areaModel, (f) => {
-    apply(f.area, requiredTextSchema);
-    apply(f.description, requiredTextSchema);
-  });
+  private readonly modal = viewChild.required(DocumentalAreaFormModal);
 
   onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -85,44 +65,15 @@ export class DocumentalAreas {
   }
 
   openCreate(): void {
-    this.editingId.set(null);
-    this.formError.set(null);
-    this.areaModel.set({ area: '', description: '', color: '#2563eb' });
-    this.dialogRef().nativeElement.showModal();
+    this.modal().open();
   }
 
   openEdit(item: DocumentalArea): void {
-    this.editingId.set(item.id);
-    this.formError.set(null);
-    this.areaModel.set({ area: item.area, description: item.description, color: item.color });
-    this.dialogRef().nativeElement.showModal();
+    this.modal().open(item);
   }
 
-  closeDialog(): void {
-    this.dialogRef().nativeElement.close();
-  }
-
-  async save(): Promise<void> {
-    await submit(this.areaForm, async () => {
-      this.saving.set(true);
-      this.formError.set(null);
-
-      const editingId = this.editingId();
-
-      try {
-        if (editingId) {
-          await firstValueFrom(this.documentalAreaService.update(editingId, this.areaModel()));
-        } else {
-          await firstValueFrom(this.documentalAreaService.create(this.areaModel()));
-        }
-        this.closeDialog();
-        this.listResource.reload();
-      } catch (error) {
-        this.formError.set(resolveErrorMessage(error, 'No se pudo guardar el área documental.'));
-      } finally {
-        this.saving.set(false);
-      }
-    });
+  onSaved(): void {
+    this.listResource.reload();
   }
 
   async toggleStatus(item: DocumentalArea): Promise<void> {

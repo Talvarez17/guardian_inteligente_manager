@@ -3,15 +3,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
-
 import { CatalogAdapter, CatalogItem, ItemFormModel } from '../../models/catalog-crud-model';
 import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
 
 const SEARCH_DEBOUNCE_MS = 350;
-// Compact mode fetches the whole catalog (no server-side pagination) to compute accurate
-// total/active/inactive counts — fine as long as these catalogs stay small lookup tables.
-// Capped at 100 to match the backend's PaginationQueryDto @Max(100) limit validation.
 const SUMMARY_FETCH_LIMIT = 100;
 const FULL_PAGE_SIZE = 10;
 

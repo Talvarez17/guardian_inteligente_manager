@@ -1,8 +1,10 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { Observable, catchError, map, of } from 'rxjs';
 import { CatalogCrud } from '../../components/catalog-crud/catalog-crud';
+import { DocumentalAreaFormModal } from '../../components/documental-area-form-modal/documental-area-form-modal';
+import { DocumentTypeFormModal } from '../../components/document-type-form-modal/document-type-form-modal';
 import { TurnoverCatalogService } from '../../services/turnover-catalog.service';
 import { ClientRoleCatalogService } from '../../services/client-role-catalog.service';
 import { PaymentMethodCatalogService } from '../../services/payment-method-catalog.service';
@@ -20,7 +22,7 @@ const SUMMARY_FETCH_LIMIT = 100;
 
 @Component({
   selector: 'app-management',
-  imports: [RouterLink, CatalogCrud],
+  imports: [RouterLink, CatalogCrud, DocumentalAreaFormModal, DocumentTypeFormModal],
   templateUrl: './management.html',
 })
 export class Management {
@@ -35,12 +37,31 @@ export class Management {
   private readonly documentalAreaService = inject(DocumentalAreaService);
   private readonly documentTypeService = inject(DocumentTypeService);
 
+  private readonly areaModal = viewChild.required(DocumentalAreaFormModal);
+  private readonly typeModal = viewChild.required(DocumentTypeFormModal);
+
   readonly documentalAreasSummary = this.createSummary(() =>
     this.documentalAreaService.findAll({ limit: SUMMARY_FETCH_LIMIT }),
   );
   readonly documentTypesSummary = this.createSummary(() =>
     this.documentTypeService.findAll({ limit: SUMMARY_FETCH_LIMIT }),
   );
+
+  openCreateArea(): void {
+    this.areaModal().open();
+  }
+
+  onAreaSaved(): void {
+    this.documentalAreasSummary.reload();
+  }
+
+  openCreateType(): void {
+    this.typeModal().open();
+  }
+
+  onTypeSaved(): void {
+    this.documentTypesSummary.reload();
+  }
 
   private createSummary<T extends { status: boolean }>(fetch: () => Observable<PaginatedResponse<T>>) {
     const resource = rxResource({
@@ -67,6 +88,7 @@ export class Management {
       total,
       active,
       inactive: computed(() => total() - active()),
+      reload: () => resource.reload(),
     };
   }
 }

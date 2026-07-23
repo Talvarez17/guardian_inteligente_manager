@@ -29,10 +29,10 @@
       <div class="card-body gap-3">
         <div class="flex items-center justify-between gap-2">
           <h2 class="font-bold text-base-content">Áreas documentales</h2>
-          <a routerLink="/gestion/areas-documentales" [queryParams]="{ create: 1 }" class="btn btn-primary btn-sm">
+          <button type="button" class="btn btn-primary btn-sm" (click)="openCreateArea()">
             <i class="material-symbols-rounded text-[16px]!">add</i>
             Nuevo
-          </a>
+          </button>
         </div>
         @if (documentalAreasSummary.loading()) {
         <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
@@ -64,10 +64,10 @@
       <div class="card-body gap-3">
         <div class="flex items-center justify-between gap-2">
           <h2 class="font-bold text-base-content">Tipos de documento</h2>
-          <a routerLink="/gestion/tipos-documento" [queryParams]="{ create: 1 }" class="btn btn-primary btn-sm">
+          <button type="button" class="btn btn-primary btn-sm" (click)="openCreateType()">
             <i class="material-symbols-rounded text-[16px]!">add</i>
             Nuevo
-          </a>
+          </button>
         </div>
         @if (documentTypesSummary.loading()) {
         <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
@@ -97,3 +97,6 @@
     </div>
   </div>
 </section>
+
+<app-documental-area-form-modal (saved)="onAreaSaved()" />
+<app-document-type-form-modal (saved)="onTypeSaved()" />

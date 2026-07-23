@@ -1,0 +1,49 @@
+<dialog #dialogRef class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">{{ editingId() ? 'Editar' : 'Nuevo' }} tipo de documento</h3>
+    <div class="py-4 flex flex-col gap-4">
+      <label class="fieldset">
+        <span class="label text-xs">Nombre</span>
+        <input type="text" class="input w-full" [formField]="typeForm.name" />
+        @if (typeForm.name().invalid() && typeForm.name().touched()) {
+        <p class="text-error text-xs mt-1">{{ typeForm.name().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Área documental</span>
+        <select class="select w-full" [formField]="typeForm.category_id">
+          <option value="" disabled>Selecciona un área</option>
+          @for (area of areas(); track area.id) {
+          <option [value]="area.id">{{ area.area }}</option>
+          }
+        </select>
+        @if (typeForm.category_id().invalid() && typeForm.category_id().touched()) {
+        <p class="text-error text-xs mt-1">{{ typeForm.category_id().errors()[0].message }}</p>
+        }
+      </label>
+
+      <label class="fieldset">
+        <span class="label text-xs">Vigencia (meses)</span>
+        <input type="number" class="input w-full" [formField]="typeForm.validity" />
+        @if (typeForm.validity().invalid() && typeForm.validity().touched()) {
+        <p class="text-error text-xs mt-1">{{ typeForm.validity().errors()[0].message }}</p>
+        }
+      </label>
+
+      @if (formError()) {
+      <p class="text-error text-xs">{{ formError() }}</p>
+      }
+    </div>
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
+      <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+        @if (saving()) { <span class="loading loading-spinner loading-xs"></span> }
+        Guardar
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

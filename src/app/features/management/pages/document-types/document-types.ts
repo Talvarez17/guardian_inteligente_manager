@@ -1,14 +1,12 @@
-import { Component, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormField, apply, form, submit } from '@angular/forms/signals';
+import { RouterLink } from '@angular/router';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { DocumentTypeService } from '../../services/document-type.service';
 import { DocumentalAreaService } from '../../services/documental-area.service';
-import { DocumentType, DocumentTypeFormModel } from '../../models/document-type-model';
+import { DocumentType } from '../../models/document-type-model';
 import { DocumentalArea } from '../../models/documental-area-model';
-import { requiredSelectSchema, requiredTextSchema, strictlyPositiveNumberSchema } from '../../../../shared/forms/field-schemas';
-import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
+import { DocumentTypeFormModal } from '../../components/document-type-form-modal/document-type-form-modal';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const PAGE_SIZE = 10;
@@ -16,21 +14,12 @@ const AREA_OPTIONS_LIMIT = 100;
 
 @Component({
   selector: 'app-document-types',
-  imports: [RouterLink, FormField],
+  imports: [RouterLink, DocumentTypeFormModal],
   templateUrl: './document-types.html',
 })
 export class DocumentTypes {
   private readonly documentTypeService = inject(DocumentTypeService);
   private readonly documentalAreaService = inject(DocumentalAreaService);
-  private readonly route = inject(ActivatedRoute);
-
-  constructor() {
-    afterNextRender(() => {
-      if (this.route.snapshot.queryParamMap.has('create')) {
-        this.openCreate();
-      }
-    });
-  }
 
   readonly areas = toSignal(
     this.documentalAreaService.findAll({ limit: AREA_OPTIONS_LIMIT }).pipe(map((response) => response.data)),
@@ -64,19 +53,9 @@ export class DocumentTypes {
     return result && !result.ok ? 'No se pudo cargar la información.' : null;
   });
 
-  private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
-
-  readonly editingId = signal<number | null>(null);
-  readonly saving = signal(false);
-  readonly formError = signal<string | null>(null);
   readonly togglingId = signal<number | null>(null);
 
-  readonly typeModel = signal<DocumentTypeFormModel>({ name: '', category_id: '', validity: 12 });
-  readonly typeForm = form(this.typeModel, (f) => {
-    apply(f.name, requiredTextSchema);
-    apply(f.category_id, requiredSelectSchema);
-    apply(f.validity, strictlyPositiveNumberSchema);
-  });
+  private readonly modal = viewChild.required(DocumentTypeFormModal);
 
   areaName(categoryId: number): string {
     return this.areas().find((area) => area.id === categoryId)?.area ?? '—';
@@ -99,45 +78,15 @@ export class DocumentTypes {
   }
 
   openCreate(): void {
-    this.editingId.set(null);
-    this.formError.set(null);
-    this.typeModel.set({ name: '', category_id: '', validity: 12 });
-    this.dialogRef().nativeElement.showModal();
+    this.modal().open();
   }
 
   openEdit(item: DocumentType): void {
-    this.editingId.set(item.id);
-    this.formError.set(null);
-    this.typeModel.set({ name: item.name, category_id: String(item.category_id), validity: item.validity });
-    this.dialogRef().nativeElement.showModal();
+    this.modal().open(item);
   }
 
-  closeDialog(): void {
-    this.dialogRef().nativeElement.close();
-  }
-
-  async save(): Promise<void> {
-    await submit(this.typeForm, async () => {
-      this.saving.set(true);
-      this.formError.set(null);
-
-      const editingId = this.editingId();
-      const payload = { ...this.typeModel(), category_id: Number(this.typeModel().category_id) };
-
-      try {
-        if (editingId) {
-          await firstValueFrom(this.documentTypeService.update(editingId, payload));
-        } else {
-          await firstValueFrom(this.documentTypeService.create(payload));
-        }
-        this.closeDialog();
-        this.listResource.reload();
-      } catch (error) {
-        this.formError.set(resolveErrorMessage(error, 'No se pudo guardar el tipo de documento.'));
-      } finally {
-        this.saving.set(false);
-      }
-    });
+  onSaved(): void {
+    this.listResource.reload();
   }
 
   async toggleStatus(item: DocumentType): Promise<void> {
