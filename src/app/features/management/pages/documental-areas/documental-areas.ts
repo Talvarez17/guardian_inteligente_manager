@@ -1,6 +1,6 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { DocumentalAreaService } from '../../services/documental-area.service';
@@ -18,6 +18,15 @@ const PAGE_SIZE = 10;
 })
 export class DocumentalAreas {
   private readonly documentalAreaService = inject(DocumentalAreaService);
+  private readonly route = inject(ActivatedRoute);
+
+  constructor() {
+    afterNextRender(() => {
+      if (this.route.snapshot.queryParamMap.has('create')) {
+        this.openCreate();
+      }
+    });
+  }
 
   readonly search = signal('');
   readonly page = signal(1);

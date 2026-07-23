@@ -1,6 +1,6 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormField, apply, form, submit } from '@angular/forms/signals';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { DocumentTypeService } from '../../services/document-type.service';
@@ -22,6 +22,15 @@ const AREA_OPTIONS_LIMIT = 100;
 export class DocumentTypes {
   private readonly documentTypeService = inject(DocumentTypeService);
   private readonly documentalAreaService = inject(DocumentalAreaService);
+  private readonly route = inject(ActivatedRoute);
+
+  constructor() {
+    afterNextRender(() => {
+      if (this.route.snapshot.queryParamMap.has('create')) {
+        this.openCreate();
+      }
+    });
+  }
 
   readonly areas = toSignal(
     this.documentalAreaService.findAll({ limit: AREA_OPTIONS_LIMIT }).pipe(map((response) => response.data)),

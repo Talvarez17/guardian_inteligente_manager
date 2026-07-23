@@ -25,23 +25,75 @@
 <section class="flex flex-col gap-3 mt-6 mb-6">
   <h2 class="text-sm font-bold uppercase tracking-wide text-base-content/50">Catálogos documentales</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <a routerLink="/gestion/areas-documentales" class="card card-sm shadow-sm bg-base-100 hover:shadow-md transition-shadow">
-      <div class="card-body gap-1">
-        <h3 class="font-bold text-base-content flex items-center gap-2">
-          <i class="material-symbols-rounded text-[18px]! text-primary">folder</i>
-          Áreas documentales
-        </h3>
-        <p class="text-xs text-base-content/60">Clasifica los documentos por área (fiscal, legal, operativo...) con color e identificador.</p>
+    <div class="card card-sm shadow-sm bg-base-100">
+      <div class="card-body gap-3">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="font-bold text-base-content">Áreas documentales</h2>
+          <a routerLink="/gestion/areas-documentales" [queryParams]="{ create: 1 }" class="btn btn-primary btn-sm">
+            <i class="material-symbols-rounded text-[16px]!">add</i>
+            Nuevo
+          </a>
+        </div>
+        @if (documentalAreasSummary.loading()) {
+        <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
+        } @else if (documentalAreasSummary.error()) {
+        <p class="text-error text-sm text-center py-6">{{ documentalAreasSummary.error() }}</p>
+        } @else {
+        <div class="stats stats-vertical sm:stats-horizontal bg-base-200/50 w-full">
+          <div class="stat place-items-center py-3">
+            <div class="stat-title text-xs">Total</div>
+            <div class="stat-value text-2xl">{{ documentalAreasSummary.total() }}</div>
+          </div>
+          <div class="stat place-items-center py-3">
+            <div class="stat-title text-xs">Activos</div>
+            <div class="stat-value text-2xl text-success">{{ documentalAreasSummary.active() }}</div>
+          </div>
+          <div class="stat place-items-center py-3">
+            <div class="stat-title text-xs">Inactivos</div>
+            <div class="stat-value text-2xl text-error">{{ documentalAreasSummary.inactive() }}</div>
+          </div>
+        </div>
+        }
+        <a routerLink="/gestion/areas-documentales" class="btn btn-outline btn-sm w-full">
+          Ver lista
+          <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
+        </a>
       </div>
-    </a>
-    <a routerLink="/gestion/tipos-documento" class="card card-sm shadow-sm bg-base-100 hover:shadow-md transition-shadow">
-      <div class="card-body gap-1">
-        <h3 class="font-bold text-base-content flex items-center gap-2">
-          <i class="material-symbols-rounded text-[18px]! text-primary">description</i>
-          Tipos de documento
-        </h3>
-        <p class="text-xs text-base-content/60">Define los tipos de documento disponibles, su área y su vigencia por defecto.</p>
+    </div>
+    <div class="card card-sm shadow-sm bg-base-100">
+      <div class="card-body gap-3">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="font-bold text-base-content">Tipos de documento</h2>
+          <a routerLink="/gestion/tipos-documento" [queryParams]="{ create: 1 }" class="btn btn-primary btn-sm">
+            <i class="material-symbols-rounded text-[16px]!">add</i>
+            Nuevo
+          </a>
+        </div>
+        @if (documentTypesSummary.loading()) {
+        <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
+        } @else if (documentTypesSummary.error()) {
+        <p class="text-error text-sm text-center py-6">{{ documentTypesSummary.error() }}</p>
+        } @else {
+        <div class="stats stats-vertical sm:stats-horizontal bg-base-200/50 w-full">
+          <div class="stat place-items-center py-3">
+            <div class="stat-title text-xs">Total</div>
+            <div class="stat-value text-2xl">{{ documentTypesSummary.total() }}</div>
+          </div>
+          <div class="stat place-items-center py-3">
+            <div class="stat-title text-xs">Activos</div>
+            <div class="stat-value text-2xl text-success">{{ documentTypesSummary.active() }}</div>
+          </div>
+          <div class="stat place-items-center py-3">
+            <div class="stat-title text-xs">Inactivos</div>
+            <div class="stat-value text-2xl text-error">{{ documentTypesSummary.inactive() }}</div>
+          </div>
+        </div>
+        }
+        <a routerLink="/gestion/tipos-documento" class="btn btn-outline btn-sm w-full">
+          Ver lista
+          <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
+        </a>
       </div>
-    </a>
+    </div>
   </div>
 </section>

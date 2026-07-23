@@ -4,8 +4,8 @@ import { catchError, firstValueFrom, of } from 'rxjs';
 import { DocumentService } from '../../services/document.service';
 import { Document, DocumentComputedStatus } from '../../models/document-model';
 import { DocumentFormModal } from '../document-form-modal/document-form-modal';
+import { computeDocumentStatus, documentStatusBadgeClass, documentStatusLabel } from '../../../../shared/utils/document-status.util';
 
-const DUE_SOON_THRESHOLD_DAYS = 30;
 const PAGE_LIMIT = 50;
 
 @Component({
@@ -57,31 +57,14 @@ export class DocumentsPanel {
   }
 
   computedStatus(document: Document): DocumentComputedStatus {
-    const daysUntilExpiration = (new Date(document.expiration_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-    if (daysUntilExpiration < 0) return 'vencido';
-    if (daysUntilExpiration <= DUE_SOON_THRESHOLD_DAYS) return 'por-vencer';
-    return 'vigente';
+    return computeDocumentStatus(document.expiration_date);
   }
 
   statusLabel(status: DocumentComputedStatus): string {
-    switch (status) {
-      case 'vigente':
-        return 'Vigente';
-      case 'por-vencer':
-        return 'Por vencer';
-      case 'vencido':
-        return 'Vencido';
-    }
+    return documentStatusLabel(status);
   }
 
   statusBadgeClass(status: DocumentComputedStatus): string {
-    switch (status) {
-      case 'vigente':
-        return 'badge-success';
-      case 'por-vencer':
-        return 'badge-warning';
-      case 'vencido':
-        return 'badge-error';
-    }
+    return documentStatusBadgeClass(status);
   }
 }

@@ -1,0 +1,16 @@
+<section class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">Documentos</h1>
+    @if (establishment(); as item) {
+    <p class="text-sm text-base-content/60">{{ item.name }}</p>
+    }
+  </div>
+  <a [routerLink]="['/establecimientos', id()]" class="btn btn-ghost btn-sm">
+    <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
+    Volver al establecimiento
+  </a>
+</section>
+
+<section class="grid grid-cols-1 mt-4">
+  <app-documents-panel [establishmentId]="id()" />
+</section>

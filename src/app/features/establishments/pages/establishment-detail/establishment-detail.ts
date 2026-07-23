@@ -1,26 +1,24 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { FormField, apply, form, submit } from '@angular/forms/signals';
-import { catchError, firstValueFrom, map, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { EstablishmentService } from '../../services/establishment.service';
 import { EstablishmentContactService } from '../../services/establishment-contact.service';
 import { EstablishmentOperationService } from '../../services/establishment-operation.service';
 import { EstablishmentBillingService } from '../../services/establishment-billing.service';
 import { EstablishmentChecklistService } from '../../services/establishment-checklist.service';
-import { PaymentRecordService } from '../../services/payment-record.service';
+import { DocumentService } from '../../services/document.service';
 import { Establishment, EstablishmentStatus } from '../../models/establishment-model';
 import { ESTABLISHMENT_RISK_LABELS, ESTABLISHMENT_STATUS_LABELS } from '../../models/establishment-options';
 import { EstablishmentChecklistEntry } from '../../models/establishment-checklist-model';
-import { CreatePaymentRecordPayload, PaymentFormModel, PaymentRecord } from '../../models/payment-record-model';
-import { DocumentsPanel } from '../../components/documents-panel/documents-panel';
-import { monthSchema, requiredTextSchema, strictlyPositiveNumberSchema, yearSchema } from '../../../../shared/forms/field-schemas';
-import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
+import { computeDocumentStatus } from '../../../../shared/utils/document-status.util';
+
+const DOCUMENTS_SUMMARY_LIMIT = 100;
 
 @Component({
   selector: 'app-establishment-detail',
-  imports: [RouterLink, CurrencyPipe, DocumentsPanel, FormField],
+  imports: [RouterLink, CurrencyPipe],
   templateUrl: './establishment-detail.html',
 })
 export class EstablishmentDetail {
@@ -29,7 +27,7 @@ export class EstablishmentDetail {
   private readonly operationService = inject(EstablishmentOperationService);
   private readonly billingService = inject(EstablishmentBillingService);
   private readonly checklistService = inject(EstablishmentChecklistService);
-  private readonly paymentRecordService = inject(PaymentRecordService);
+  private readonly documentService = inject(DocumentService);
 
   readonly id = input.required<string>();
 
@@ -68,71 +66,44 @@ export class EstablishmentDetail {
   });
   readonly checklist = computed(() => this.checklistResource.value());
 
-  private readonly paymentRecordsResource = rxResource({
+  private readonly documentsResource = rxResource({
     params: () => this.id(),
-    defaultValue: [] as PaymentRecord[],
     stream: ({ params }) =>
-      this.paymentRecordService.findAllByEstablishment(params, { page: 1, limit: 50 }).pipe(
-        map((response) => response.data),
-        catchError(() => of([] as PaymentRecord[])),
-      ),
+      this.documentService.findAllByEstablishment(params, { limit: DOCUMENTS_SUMMARY_LIMIT }).pipe(catchError(() => of(null))),
   });
-  readonly paymentRecords = computed(() => this.paymentRecordsResource.value());
-  readonly loadingPayments = computed(() => this.paymentRecordsResource.isLoading());
-
-  private readonly paymentSummaryResource = rxResource({
-    params: () => this.id(),
-    stream: ({ params }) => this.paymentRecordService.getSummary(params).pipe(catchError(() => of(null))),
-  });
-  readonly paymentSummary = computed(() => this.paymentSummaryResource.value());
-
-  readonly savingPayment = signal(false);
-  readonly paymentError = signal<string | null>(null);
-
-  readonly paymentModel = signal<PaymentFormModel>({
-    period_month: new Date().getMonth() + 1,
-    period_year: new Date().getFullYear(),
-    folio: '',
-    amount: 0,
-  });
-  
-  readonly paymentForm = form(this.paymentModel, (f) => {
-    apply(f.folio, requiredTextSchema);
-    apply(f.amount, strictlyPositiveNumberSchema);
-    apply(f.period_month, monthSchema);
-    apply(f.period_year, yearSchema);
+  readonly documentsSummary = computed(() => {
+    const documents = this.documentsResource.value()?.data ?? [];
+    const summary = { total: documents.length, vigente: 0, porVencer: 0, vencido: 0 };
+    for (const document of documents) {
+      const status = computeDocumentStatus(document.expiration_date);
+      if (status === 'vigente') summary.vigente++;
+      else if (status === 'por-vencer') summary.porVencer++;
+      else summary.vencido++;
+    }
+    return summary;
   });
 
-  async addPaymentRecord(): Promise<void> {
-    await submit(this.paymentForm, async () => {
-      this.savingPayment.set(true);
-      this.paymentError.set(null);
-
-      const payload: CreatePaymentRecordPayload = { establishment_id: this.id(), ...this.paymentModel() };
-
-      try {
-        await firstValueFrom(this.paymentRecordService.create(payload));
-        this.paymentModel.set({
-          period_month: new Date().getMonth() + 1,
-          period_year: new Date().getFullYear(),
-          folio: '',
-          amount: 0,
-        });
-        this.paymentRecordsResource.reload();
-        this.paymentSummaryResource.reload();
-      } catch (error) {
-        this.paymentError.set(resolveErrorMessage(error, 'No se pudo registrar el pago.'));
-      } finally {
-        this.savingPayment.set(false);
-      }
-    });
+  documentsBadgeLabel(): string {
+    const summary = this.documentsSummary();
+    if (summary.vencido) return `${summary.vencido} vencido${summary.vencido > 1 ? 's' : ''}`;
+    if (summary.porVencer) return `${summary.porVencer} por vencer`;
+    if (summary.total) return `${summary.total} vigente${summary.total > 1 ? 's' : ''}`;
+    return 'Sin documentos';
   }
 
-  async removePaymentRecord(record: PaymentRecord): Promise<void> {
-    if (!confirm(`¿Eliminar el pago con folio "${record.folio}"?`)) return;
-    await firstValueFrom(this.paymentRecordService.remove(record.id));
-    this.paymentRecordsResource.reload();
-    this.paymentSummaryResource.reload();
+  documentsTextClass(): string {
+    const summary = this.documentsSummary();
+    if (summary.vencido) return 'text-error';
+    if (summary.porVencer) return 'text-warning';
+    if (summary.total) return 'text-base-content';
+    return 'text-base-content/50';
+  }
+
+  documentsStripClass(): string {
+    const summary = this.documentsSummary();
+    if (summary.vencido) return 'bg-error text-error-content';
+    if (summary.porVencer) return 'bg-warning text-warning-content';
+    return 'bg-primary text-primary-content';
   }
 
   statusBadgeClass(status: EstablishmentStatus): string {
@@ -144,13 +115,5 @@ export class EstablishmentDetail {
       case EstablishmentStatus.DEACTIVATE:
         return 'badge-error';
     }
-  }
-
-  monthLabel(month: number): string {
-    const labels = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-    ];
-    return labels[month - 1] ?? String(month);
   }
 }

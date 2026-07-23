@@ -14,6 +14,11 @@ export const ESTABLISHMENTS_ROUTES: Routes = [
     loadComponent: () => import('./pages/establishment-wizard/establishment-wizard').then((m) => m.EstablishmentWizard),
   },
   {
+    path: ':id/documentos',
+    loadComponent: () =>
+      import('./pages/establishment-documents/establishment-documents').then((m) => m.EstablishmentDocuments),
+  },
+  {
     path: ':id',
     loadComponent: () => import('./pages/establishment-detail/establishment-detail').then((m) => m.EstablishmentDetail),
   },

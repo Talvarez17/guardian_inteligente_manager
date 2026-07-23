@@ -4,6 +4,18 @@
 @plugin "daisyui";
 
 
+.system-logo-mask {
+  mask-image: var(--logo-src);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: var(--logo-src);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+
 @plugin "daisyui/theme" {
   name: "pro";
   default: true;
