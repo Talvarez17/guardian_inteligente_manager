@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, firstValueFrom, map, of } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { EstablishmentService } from '../../services/establishment.service';
 import { EstablishmentCatalogsService } from '../../services/establishment-catalogs.service';
 import { Establishment, EstablishmentStatus, Turnover } from '../../models/establishment-model';
@@ -88,31 +88,36 @@ export class Establishments {
     this.page.set(page);
   }
 
-  async remove(establishment: Establishment): Promise<void> {
-    if (!confirm(`¿Dar de baja "${establishment.name}"?`)) return;
-    await firstValueFrom(this.service.remove(establishment.id));
-    this.listResource.reload();
-  }
-
-  statusBadgeClass(status: EstablishmentStatus): string {
+  statusAccentClass(status: EstablishmentStatus): string {
     switch (status) {
       case EstablishmentStatus.CLIENT:
-        return 'badge-success';
+        return 'border-l-success';
       case EstablishmentStatus.PROSPECT:
-        return 'badge-info';
+        return 'border-l-info';
       case EstablishmentStatus.DEACTIVATE:
-        return 'badge-error';
+        return 'border-l-error';
     }
   }
 
-  statusIcon(status: EstablishmentStatus): string {
+  statusAvatarClass(status: EstablishmentStatus): string {
     switch (status) {
       case EstablishmentStatus.CLIENT:
-        return 'check_circle';
+        return 'bg-success/15 text-success';
       case EstablishmentStatus.PROSPECT:
-        return 'info';
+        return 'bg-info/15 text-info';
       case EstablishmentStatus.DEACTIVATE:
-        return 'error';
+        return 'bg-error/15 text-error';
+    }
+  }
+
+  statusTextClass(status: EstablishmentStatus): string {
+    switch (status) {
+      case EstablishmentStatus.CLIENT:
+        return 'text-success';
+      case EstablishmentStatus.PROSPECT:
+        return 'text-info';
+      case EstablishmentStatus.DEACTIVATE:
+        return 'text-error';
     }
   }
 }

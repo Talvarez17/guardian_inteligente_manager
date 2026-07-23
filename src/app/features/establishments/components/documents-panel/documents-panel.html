@@ -1,3 +1,63 @@
+<ng-template #rowsTemplate let-list>
+  @if (loading()) {
+  <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
+  } @else if (list.length) {
+  <div class="flex flex-col gap-3">
+    @for (item of list; track item.id) {
+    <div
+      class="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-box border border-l-4 border-base-300 bg-base-100 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      [class]="statusAccentClass(computedStatus(item))">
+      <div class="flex size-10 items-center justify-center rounded-xl text-sm font-bold"
+        [class]="statusAvatarClass(computedStatus(item))">
+        <i class="material-symbols-rounded text-[20px]!">description</i>
+      </div>
+
+      <div class="grid min-w-0 grid-cols-10 items-center gap-x-3 gap-y-0.5">
+        <div class="col-span-10 min-w-0 md:col-span-5">
+          <p class="font-semibold text-base-content truncate">{{ item.name }}</p>
+          <p class="text-xs font-semibold" [class]="statusTextClass(computedStatus(item))">
+            {{ statusLabel(computedStatus(item)) }}
+          </p>
+        </div>
+
+        <div class="hidden min-w-0 md:block md:col-span-2">
+          <p class="text-[11px] uppercase tracking-wide text-base-content/40">Área</p>
+          <p class="text-sm truncate">{{ item.area.area }}</p>
+        </div>
+        <div class="hidden min-w-0 md:block md:col-span-1">
+          <p class="text-[11px] uppercase tracking-wide text-base-content/40">Versión</p>
+          <p class="text-sm truncate">{{ item.version }}</p>
+        </div>
+        <div class="hidden min-w-0 md:block md:col-span-2">
+          <p class="text-[11px] uppercase tracking-wide text-base-content/40">Vencimiento</p>
+          <p class="text-sm truncate">{{ item.expiration_date }}</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 justify-self-end">
+        <button type="button" title="Editar" (click)="openEdit(item)"
+          class="flex size-9 items-center justify-center rounded-full bg-primary/12 text-primary transition-colors hover:bg-primary/20">
+          <i class="material-symbols-rounded text-[18px]!">edit</i>
+        </button>
+        <button type="button" title="Eliminar" [disabled]="removingId() === item.id" (click)="askRemoveDocument(item)"
+          class="flex size-9 items-center justify-center rounded-full bg-error/12 text-error transition-colors hover:bg-error/20 disabled:opacity-60">
+          @if (removingId() === item.id) {
+          <span class="loading loading-spinner loading-xs"></span>
+          } @else {
+          <i class="material-symbols-rounded text-[18px]!">delete</i>
+          }
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+  <p class="text-sm text-base-content/60 py-6 text-center">Aún no hay documentos registrados{{ mode() === 'full' &&
+    documents().length ? ' con esos filtros' : '' }}.</p>
+  }
+</ng-template>
+
+@if (mode() === 'compact') {
 <div class="card bg-base-100 shadow-sm md:col-span-2">
   <div class="card-body gap-3">
     <div class="flex items-center justify-between gap-3">
@@ -11,64 +71,41 @@
       </button>
     </div>
 
-    @if (loading()) {
-    <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
-    } @else if (documents().length) {
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Documento</th>
-            <th>Área</th>
-            <th>Versión</th>
-            <th>Estatus</th>
-            <th>Vencimiento</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of documents(); track item.id) {
-          <tr>
-            <td>
-              <p class="font-semibold text-base-content">{{ item.name }}</p>
-              @if (item.comments) {
-              <p class="text-xs text-base-content/50">{{ item.comments }}</p>
-              }
-            </td>
-            <td>{{ item.area.area }}</td>
-            <td>{{ item.version }}</td>
-            <td>
-              <span class="badge badge-soft" [class]="statusBadgeClass(computedStatus(item))">
-                {{ statusLabel(computedStatus(item)) }}
-              </span>
-            </td>
-            <td>{{ item.expiration_date }}</td>
-            <td>
-              <div class="join">
-                <button type="button" class="btn btn-outline btn-primary btn-sm join-item" (click)="openEdit(item)">
-                  <i class="material-symbols-rounded text-[16px]!">edit</i>
-                  Editar
-                </button>
-                <button type="button" class="btn btn-outline btn-error btn-sm join-item" [disabled]="removingId() === item.id"
-                  (click)="removeDocument(item)">
-                  @if (removingId() === item.id) {
-                  <span class="loading loading-spinner loading-xs"></span>
-                  } @else {
-                  <i class="material-symbols-rounded text-[16px]!">delete</i>
-                  }
-                  Eliminar
-                </button>
-              </div>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    } @else {
-    <p class="text-sm text-base-content/60 py-6 text-center">Aún no hay documentos registrados para este establecimiento.</p>
-    }
+    <ng-container *ngTemplateOutlet="rowsTemplate; context: { $implicit: documents() }" />
   </div>
 </div>
+} @else {
+
+<section class="flex flex-wrap items-center gap-3">
+  <label class="input grow-7 min-w-55">
+    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </g>
+    </svg>
+    <input class="w-full" type="search" placeholder="Buscar documento por nombre..." (input)="onSearchInput($event)" />
+  </label>
+
+  <select class="select w-44 flex-auto" (change)="onAreaFilterChange($event)">
+    <option value="">Área</option>
+    @for (area of areaOptions(); track area.id) {
+    <option [value]="area.id">{{ area.area }}</option>
+    }
+  </select>
+
+  <select class="select w-40 flex-auto" (change)="onStatusFilterChange($event)">
+    <option value="">Estatus</option>
+    @for (status of statusOptions; track status) {
+    <option [value]="status">{{ statusLabel(status) }}</option>
+    }
+  </select>
+</section>
+
+<section class="mt-4">
+  <ng-container *ngTemplateOutlet="rowsTemplate; context: { $implicit: filtered() }" />
+</section>
+}
 
 <app-document-form-modal [establishmentId]="establishmentId()" (saved)="onSaved()" />
+<app-confirm-delete-modal actionLabel="eliminar" (confirmed)="confirmRemoveDocument()" />

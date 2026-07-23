@@ -1,8 +1,8 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
-import { catchError, of } from 'rxjs';
+import { Router, RouterLink } from '@angular/router';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { EstablishmentService } from '../../services/establishment.service';
 import { EstablishmentContactService } from '../../services/establishment-contact.service';
 import { EstablishmentOperationService } from '../../services/establishment-operation.service';
@@ -13,12 +13,13 @@ import { Establishment, EstablishmentStatus } from '../../models/establishment-m
 import { ESTABLISHMENT_RISK_LABELS, ESTABLISHMENT_STATUS_LABELS } from '../../models/establishment-options';
 import { EstablishmentChecklistEntry } from '../../models/establishment-checklist-model';
 import { computeDocumentStatus } from '../../../../shared/utils/document-status.util';
+import { ConfirmDeleteModal } from '../../../../shared/ui/confirm-delete-modal/confirm-delete-modal';
 
 const DOCUMENTS_SUMMARY_LIMIT = 100;
 
 @Component({
   selector: 'app-establishment-detail',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink, CurrencyPipe, ConfirmDeleteModal],
   templateUrl: './establishment-detail.html',
 })
 export class EstablishmentDetail {
@@ -28,6 +29,9 @@ export class EstablishmentDetail {
   private readonly billingService = inject(EstablishmentBillingService);
   private readonly checklistService = inject(EstablishmentChecklistService);
   private readonly documentService = inject(DocumentService);
+  private readonly router = inject(Router);
+
+  private readonly confirmModal = viewChild.required(ConfirmDeleteModal);
 
   readonly id = input.required<string>();
 
@@ -104,6 +108,18 @@ export class EstablishmentDetail {
     if (summary.vencido) return 'bg-error text-error-content';
     if (summary.porVencer) return 'bg-warning text-warning-content';
     return 'bg-primary text-primary-content';
+  }
+
+  askRemove(establishment: Establishment): void {
+    this.confirmModal().open(establishment.name);
+  }
+
+  async confirmRemove(): Promise<void> {
+    const establishment = this.establishment();
+    if (!establishment) return;
+
+    await firstValueFrom(this.establishmentService.remove(establishment.id));
+    this.router.navigate(['/establecimientos']);
   }
 
   statusBadgeClass(status: EstablishmentStatus): string {

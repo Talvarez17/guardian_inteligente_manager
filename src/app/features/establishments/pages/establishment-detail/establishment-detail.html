@@ -10,12 +10,18 @@
       <i class="material-symbols-rounded text-[18px]!">edit</i>
       Editar
     </a>
+    <button type="button" class="btn btn-outline btn-error btn-sm" (click)="askRemove(item)">
+      <i class="material-symbols-rounded text-[18px]!">block</i>
+      Dar de baja
+    </button>
     <a routerLink="/establecimientos" class="btn btn-ghost btn-sm">
       <i class="material-symbols-rounded text-[18px]!">arrow_back</i>
       Volver
     </a>
   </div>
 </section>
+
+<app-confirm-delete-modal actionLabel="dar de baja" (confirmed)="confirmRemove()" />
 
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
   <div class="rounded-box border border-base-300 bg-base-100 px-3 py-2.5">

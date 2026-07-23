@@ -20,13 +20,35 @@ export function documentStatusLabel(status: DocumentComputedStatus): string {
   }
 }
 
-export function documentStatusBadgeClass(status: DocumentComputedStatus): string {
+export function documentStatusAccentClass(status: DocumentComputedStatus): string {
   switch (status) {
     case 'vigente':
-      return 'badge-success';
+      return 'border-l-success';
     case 'por-vencer':
-      return 'badge-warning';
+      return 'border-l-warning';
     case 'vencido':
-      return 'badge-error';
+      return 'border-l-error';
+  }
+}
+
+export function documentStatusAvatarClass(status: DocumentComputedStatus): string {
+  switch (status) {
+    case 'vigente':
+      return 'bg-success/15 text-success';
+    case 'por-vencer':
+      return 'bg-warning/15 text-warning';
+    case 'vencido':
+      return 'bg-error/15 text-error';
+  }
+}
+
+export function documentStatusTextClass(status: DocumentComputedStatus): string {
+  switch (status) {
+    case 'vigente':
+      return 'text-success';
+    case 'por-vencer':
+      return 'text-warning';
+    case 'vencido':
+      return 'text-error';
   }
 }

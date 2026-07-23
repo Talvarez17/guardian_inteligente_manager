@@ -1,0 +1,33 @@
+<dialog #dialogRef class="modal">
+  <div class="modal-box">
+    <div class="flex items-start gap-3">
+      <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-error/12 text-error">
+        <i class="material-symbols-rounded text-[20px]!">warning</i>
+      </div>
+      <div class="min-w-0">
+        <h3 class="font-bold text-lg">{{ title() }}</h3>
+        <p class="text-sm text-base-content/60 mt-1">
+          Estás a punto de {{ actionLabel() }}
+          <span class="font-semibold text-base-content">{{ entityLabel() }}</span>.
+          Esta acción no se puede deshacer fácilmente.
+        </p>
+      </div>
+    </div>
+
+    <label class="fieldset mt-4">
+      <span class="label text-xs">Escribe <span class="font-mono font-semibold">{{ confirmWord() }}</span> para confirmar</span>
+      <input type="text" class="input w-full" [value]="typedValue()" (input)="onInput($event)" autocomplete="off"
+        spellcheck="false" />
+    </label>
+
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" (click)="close()">Cancelar</button>
+      <button type="button" class="btn btn-error" [disabled]="!isMatch()" (click)="confirm()">
+        Sí, {{ actionLabel() }}
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

@@ -36,78 +36,75 @@
   </select>
 </section>
 
-<section class="card bg-base-100 shadow-sm mt-4 mb-4">
-  <div class="overflow-x-auto">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Establecimiento</th>
-          <th>RFC</th>
-          <th>Giro</th>
-          <th>Responsable</th>
-          <th>Plan</th>
-          <th>Estatus</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading()) {
-        <tr>
-          <td colspan="7" class="text-center py-10"><span class="loading loading-spinner"></span></td>
-        </tr>
-        } @else {
-        @for (item of filtered(); track item.id) {
-        <tr>
-          <td>
-            <p class="font-semibold text-base-content">{{ item.name }}</p>
-            <p class="text-xs text-base-content/50">{{ item.business_name }}</p>
-          </td>
-          <td class="font-mono text-xs">{{ item.rfc }}</td>
-          <td>{{ item.turnover.name }}</td>
-          <td>{{ item.designated_person.name }} {{ item.designated_person.first_last_name }}</td>
-          <td>{{ item.plan.name }}</td>
-          <td>
-            <span class="badge badge-soft gap-1" [class]="statusBadgeClass(item.establishment_status)">
-              <i class="material-symbols-rounded text-[14px]!">{{ statusIcon(item.establishment_status) }}</i>
-              {{ statusLabels[item.establishment_status] }}
-            </span>
-          </td>
-          <td>
-            <div class="join">
-              <a [routerLink]="['/establecimientos', item.id]" class="btn btn-outline btn-sm join-item">
-                <i class="material-symbols-rounded text-[16px]!">visibility</i>
-                Ver
-              </a>
-              <a [routerLink]="['/establecimientos', item.id, 'editar']"
-                class="btn btn-outline btn-primary btn-sm join-item">
-                <i class="material-symbols-rounded text-[16px]!">edit</i>
-                Editar
-              </a>
-              <button type="button" class="btn btn-outline btn-error btn-sm join-item" (click)="remove(item)">
-                <i class="material-symbols-rounded text-[16px]!">block</i>
-              </button>
-            </div>
-          </td>
-        </tr>
-        } @empty {
-        <tr>
-          <td colspan="7" class="text-center text-base-content/50 py-10">No se encontraron establecimientos con esos
-            filtros.</td>
-        </tr>
-        }
-        }
-      </tbody>
-    </table>
+<section class="flex flex-col gap-3 mt-4 mb-4">
+  @if (loading()) {
+  <div class="flex justify-center rounded-box border border-base-300 bg-base-100 py-10">
+    <span class="loading loading-spinner"></span>
   </div>
+  } @else {
+  @for (item of filtered(); track item.id) {
+  <div
+    class="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-box border border-l-4 border-base-300 bg-base-100 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+    [class]="statusAccentClass(item.establishment_status)">
+
+    <div class="flex size-10 items-center justify-center rounded-xl text-sm font-bold"
+      [class]="statusAvatarClass(item.establishment_status)">
+      {{ item.name.charAt(0) }}
+    </div>
+
+    <div class="grid min-w-0 grid-cols-10 items-center gap-x-3 gap-y-0.5">
+      <div class="col-span-10 min-w-0 md:col-span-3">
+        <p class="font-semibold text-base-content truncate">{{ item.name }}</p>
+        <p class="text-xs font-semibold" [class]="statusTextClass(item.establishment_status)">{{
+          statusLabels[item.establishment_status] }}</p>
+      </div>
+
+      <div class="hidden min-w-0 md:block md:col-span-1">
+        <p class="text-[11px] uppercase tracking-wide text-base-content/40">RFC</p>
+        <p class="font-mono text-xs truncate">{{ item.rfc }}</p>
+      </div>
+      <div class="hidden min-w-0 md:block md:col-span-2">
+        <p class="text-[11px] uppercase tracking-wide text-base-content/40">Giro</p>
+        <p class="text-sm truncate">{{ item.turnover.name }}</p>
+      </div>
+      <div class="hidden min-w-0 md:block md:col-span-2">
+        <p class="text-[11px] uppercase tracking-wide text-base-content/40">Responsable</p>
+        <p class="text-sm truncate">{{ item.designated_person.name }} {{ item.designated_person.first_last_name }}</p>
+      </div>
+      <div class="hidden min-w-0 md:block md:col-span-2">
+        <p class="text-[11px] uppercase tracking-wide text-base-content/40">Plan</p>
+        <p class="text-sm truncate">{{ item.plan.name }}</p>
+      </div>
+    </div>
+
+    <div class="flex gap-2 justify-self-end">
+      <a [routerLink]="['/establecimientos', item.id]" title="Ver"
+        class="flex size-9 items-center justify-center rounded-full bg-base-content/8 text-base-content/70 transition-colors hover:bg-base-content/15">
+        <i class="material-symbols-rounded text-[18px]!">visibility</i>
+      </a>
+      <a [routerLink]="['/establecimientos', item.id, 'editar']" title="Editar"
+        class="flex size-9 items-center justify-center rounded-full bg-primary/12 text-primary transition-colors hover:bg-primary/20">
+        <i class="material-symbols-rounded text-[18px]!">edit</i>
+      </a>
+    </div>
+  </div>
+  } @empty {
+  <div class="rounded-box border border-base-300 bg-base-100 py-10 text-center text-base-content/50">
+    No se encontraron establecimientos con esos filtros.
+  </div>
+  }
+  }
 </section>
 
 @if (meta(); as m) {
 @if (m.totalPages > 1) {
 <section class="flex justify-center mb-6">
   <div class="join">
-    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === 1" (click)="goToPage(m.page - 1)">«</button>
+    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === 1"
+      (click)="goToPage(m.page - 1)">«</button>
     <button type="button" class="join-item btn btn-sm btn-disabled">Página {{ m.page }} de {{ m.totalPages }}</button>
-    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === m.totalPages" (click)="goToPage(m.page + 1)">»</button>
+    <button type="button" class="join-item btn btn-sm" [disabled]="m.page === m.totalPages"
+      (click)="goToPage(m.page + 1)">»</button>
   </div>
 </section>
 } @else {
