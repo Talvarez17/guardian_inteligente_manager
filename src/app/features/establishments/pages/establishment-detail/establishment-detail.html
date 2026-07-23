@@ -127,9 +127,14 @@
         </div>
       </dl>
       } @else {
-      <p class="text-sm text-base-content/50">Aún no se ha capturado el contacto de este establecimiento.</p>
-      <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar
-        información</a>
+      <div class="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 px-4 py-6 text-center">
+        <i class="material-symbols-rounded text-[26px]! text-base-content/25">contact_page</i>
+        <p class="text-sm text-base-content/50">Aún no se ha capturado el contacto de este establecimiento.</p>
+        <a [routerLink]="['/establecimientos', item.id, 'editar']" class="btn btn-primary btn-outline btn-xs gap-1">
+          <i class="material-symbols-rounded text-[14px]!">edit</i>
+          Completar información
+        </a>
+      </div>
       }
 
       <div class="divider my-1"></div>
@@ -191,10 +196,15 @@
         </div>
       </dl>
       } @else {
-      <p class="text-sm text-base-content/50">Aún no se ha capturado la información operativa de este establecimiento.
-      </p>
-      <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar
-        información</a>
+      <div class="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 px-4 py-6 text-center">
+        <i class="material-symbols-rounded text-[26px]! text-base-content/25">security</i>
+        <p class="text-sm text-base-content/50">Aún no se ha capturado la información operativa de este
+          establecimiento.</p>
+        <a [routerLink]="['/establecimientos', item.id, 'editar']" class="btn btn-primary btn-outline btn-xs gap-1">
+          <i class="material-symbols-rounded text-[14px]!">edit</i>
+          Completar información
+        </a>
+      </div>
       }
     </div>
   </div>
@@ -233,10 +243,15 @@
           </div>
         </div>
         } @else {
-        <p class="text-sm text-base-content/50">Aún no se ha capturado la información operativa de este establecimiento.
-        </p>
-        <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar
-          información</a>
+        <div class="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 px-4 py-6 text-center">
+          <i class="material-symbols-rounded text-[26px]! text-base-content/25">memory</i>
+          <p class="text-sm text-base-content/50">Aún no se ha capturado la información operativa de este
+            establecimiento.</p>
+          <a [routerLink]="['/establecimientos', item.id, 'editar']" class="btn btn-primary btn-outline btn-xs gap-1">
+            <i class="material-symbols-rounded text-[14px]!">edit</i>
+            Completar información
+          </a>
+        </div>
         }
       </div>
     </div>
@@ -267,10 +282,15 @@
           </div>
         </dl>
         } @else {
-        <p class="text-sm text-base-content/50">Aún no se ha capturado la información de facturación de este
-          establecimiento.</p>
-        <a [routerLink]="['/establecimientos', item.id, 'editar']" class="link link-primary text-xs">Completar
-          información</a>
+        <div class="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 px-4 py-6 text-center">
+          <i class="material-symbols-rounded text-[26px]! text-base-content/25">payments</i>
+          <p class="text-sm text-base-content/50">Aún no se ha capturado la información de facturación de este
+            establecimiento.</p>
+          <a [routerLink]="['/establecimientos', item.id, 'editar']" class="btn btn-primary btn-outline btn-xs gap-1">
+            <i class="material-symbols-rounded text-[14px]!">edit</i>
+            Completar información
+          </a>
+        </div>
         }
       </div>
     </div>
