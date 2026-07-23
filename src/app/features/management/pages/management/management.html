@@ -27,72 +27,82 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <div class="card card-sm shadow-sm bg-base-100">
       <div class="card-body gap-3">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-bold text-base-content">Áreas documentales</h2>
-          <button type="button" class="btn btn-primary btn-sm" (click)="openCreateArea()">
-            <i class="material-symbols-rounded text-[16px]!">add</i>
-            Nuevo
-          </button>
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-start gap-2.5">
+            <div class="flex size-9 shrink-0 items-center justify-center rounded-xl" [class]="documentalAreasTint">
+              <i class="material-symbols-rounded text-[18px]!">folder</i>
+            </div>
+            <div class="min-w-0">
+              <h2 class="truncate font-bold text-base-content">Áreas documentales</h2>
+              @if (!documentalAreasSummary.loading() && !documentalAreasSummary.error()) {
+              <p class="text-xs text-base-content/50">{{ documentalAreasSummary.active() }} de {{ documentalAreasSummary.total() }} activos</p>
+              }
+            </div>
+          </div>
+
+          @if (documentalAreasSummary.loading()) {
+          <span class="loading loading-spinner loading-sm shrink-0"></span>
+          } @else if (!documentalAreasSummary.error()) {
+          <div class="radial-progress shrink-0 text-[10px]! font-bold text-success" style="--size:2.75rem; --thickness:3px;"
+            [style.--value]="documentalAreasSummary.percent()" role="progressbar" [attr.aria-valuenow]="documentalAreasSummary.percent()">
+            {{ documentalAreasSummary.percent() }}%
+          </div>
+          }
         </div>
-        @if (documentalAreasSummary.loading()) {
-        <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
-        } @else if (documentalAreasSummary.error()) {
-        <p class="text-error text-sm text-center py-6">{{ documentalAreasSummary.error() }}</p>
-        } @else {
-        <div class="stats stats-vertical sm:stats-horizontal bg-base-200/50 w-full">
-          <div class="stat place-items-center py-3">
-            <div class="stat-title text-xs">Total</div>
-            <div class="stat-value text-2xl">{{ documentalAreasSummary.total() }}</div>
-          </div>
-          <div class="stat place-items-center py-3">
-            <div class="stat-title text-xs">Activos</div>
-            <div class="stat-value text-2xl text-success">{{ documentalAreasSummary.active() }}</div>
-          </div>
-          <div class="stat place-items-center py-3">
-            <div class="stat-title text-xs">Inactivos</div>
-            <div class="stat-value text-2xl text-error">{{ documentalAreasSummary.inactive() }}</div>
-          </div>
-        </div>
+        @if (documentalAreasSummary.error()) {
+        <p class="text-error text-sm text-center py-4">{{ documentalAreasSummary.error() }}</p>
         }
-        <a routerLink="/gestion/areas-documentales" class="btn btn-outline btn-sm w-full">
-          Ver lista
-          <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
-        </a>
+        <div class="flex items-center gap-2 border-t border-base-200 pt-3">
+          <button type="button" title="Nuevo" (click)="openCreateArea()"
+            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content shadow-sm transition-colors hover:bg-primary/90">
+            <i class="material-symbols-rounded text-[16px]!">add</i>
+          </button>
+          <a routerLink="/gestion/areas-documentales"
+            class="flex flex-1 items-center justify-between px-1 text-sm font-semibold text-base-content/70 hover:text-base-content">
+            Ver lista
+            <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
+          </a>
+        </div>
       </div>
     </div>
     <div class="card card-sm shadow-sm bg-base-100">
       <div class="card-body gap-3">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-bold text-base-content">Tipos de documento</h2>
-          <button type="button" class="btn btn-primary btn-sm" (click)="openCreateType()">
-            <i class="material-symbols-rounded text-[16px]!">add</i>
-            Nuevo
-          </button>
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-start gap-2.5">
+            <div class="flex size-9 shrink-0 items-center justify-center rounded-xl" [class]="documentTypesTint">
+              <i class="material-symbols-rounded text-[18px]!">description</i>
+            </div>
+            <div class="min-w-0">
+              <h2 class="truncate font-bold text-base-content">Tipos de documento</h2>
+              @if (!documentTypesSummary.loading() && !documentTypesSummary.error()) {
+              <p class="text-xs text-base-content/50">{{ documentTypesSummary.active() }} de {{ documentTypesSummary.total() }} activos</p>
+              }
+            </div>
+          </div>
+
+          @if (documentTypesSummary.loading()) {
+          <span class="loading loading-spinner loading-sm shrink-0"></span>
+          } @else if (!documentTypesSummary.error()) {
+          <div class="radial-progress shrink-0 text-[10px]! font-bold text-success" style="--size:2.75rem; --thickness:3px;"
+            [style.--value]="documentTypesSummary.percent()" role="progressbar" [attr.aria-valuenow]="documentTypesSummary.percent()">
+            {{ documentTypesSummary.percent() }}%
+          </div>
+          }
         </div>
-        @if (documentTypesSummary.loading()) {
-        <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
-        } @else if (documentTypesSummary.error()) {
-        <p class="text-error text-sm text-center py-6">{{ documentTypesSummary.error() }}</p>
-        } @else {
-        <div class="stats stats-vertical sm:stats-horizontal bg-base-200/50 w-full">
-          <div class="stat place-items-center py-3">
-            <div class="stat-title text-xs">Total</div>
-            <div class="stat-value text-2xl">{{ documentTypesSummary.total() }}</div>
-          </div>
-          <div class="stat place-items-center py-3">
-            <div class="stat-title text-xs">Activos</div>
-            <div class="stat-value text-2xl text-success">{{ documentTypesSummary.active() }}</div>
-          </div>
-          <div class="stat place-items-center py-3">
-            <div class="stat-title text-xs">Inactivos</div>
-            <div class="stat-value text-2xl text-error">{{ documentTypesSummary.inactive() }}</div>
-          </div>
-        </div>
+        @if (documentTypesSummary.error()) {
+        <p class="text-error text-sm text-center py-4">{{ documentTypesSummary.error() }}</p>
         }
-        <a routerLink="/gestion/tipos-documento" class="btn btn-outline btn-sm w-full">
-          Ver lista
-          <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
-        </a>
+        <div class="flex items-center gap-2 border-t border-base-200 pt-3">
+          <button type="button" title="Nuevo" (click)="openCreateType()"
+            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content shadow-sm transition-colors hover:bg-primary/90">
+            <i class="material-symbols-rounded text-[16px]!">add</i>
+          </button>
+          <a routerLink="/gestion/tipos-documento"
+            class="flex flex-1 items-center justify-between px-1 text-sm font-semibold text-base-content/70 hover:text-base-content">
+            Ver lista
+            <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
+          </a>
+        </div>
       </div>
     </div>
   </div>

@@ -74,7 +74,6 @@ export class Plans {
       await firstValueFrom(this.plansService.update(plan.id, { status: !plan.status }));
       this.plansResource.reload();
     } catch {
-      // Silencioso: igual que antes, el usuario ve que togglingId vuelve a null sin cambio de estado.
     } finally {
       this.togglingId.set(null);
     }

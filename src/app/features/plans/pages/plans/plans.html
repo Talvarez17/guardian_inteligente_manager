@@ -26,12 +26,12 @@
     <div class="relative p-5 text-white bg-linear-to-br" [class]="cardGradient(i)">
       <div class="absolute top-3 right-3 flex items-center gap-2">
         <div class="tooltip tooltip-left" [attr.data-tip]="item.status ? 'Clic para desactivar' : 'Clic para activar'">
-          <input type="checkbox" class="toggle toggle-sm" [checked]="item.status" [disabled]="togglingId() === item.id"
+          <input type="checkbox" class="toggle toggle-sm toggle-success" [checked]="item.status" [disabled]="togglingId() === item.id"
             (change)="toggleStatus(item)" />
         </div>
-        <button type="button" class="btn btn-circle btn-ghost btn-xs text-white hover:bg-white/20" (click)="openEdit(item)">
-          <i class="material-symbols-rounded text-[16px]!">edit</i>
-        </button>
+        <a type="button" class="flex size-9 items-center justify-center rounded-full bg-base-100/12 text-primary transition-colors hover:bg-base-100/20 cursor-pointer" (click)="openEdit(item)">
+          <i class="material-symbols-rounded text-[16px]! text-base-100">edit</i>
+        </a>
       </div>
       <h2 class="text-xl font-bold">{{ item.name }}</h2>
       <p class="text-3xl font-extrabold mt-1">${{ item.amount | number: '1.2-2' }}</p>

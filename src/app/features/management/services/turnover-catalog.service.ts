@@ -15,6 +15,7 @@ export class TurnoverCatalogService implements CatalogAdapter {
   readonly key = 'turnover';
   readonly label = 'Giro comercial';
   readonly labelPlural = 'Giros comerciales';
+  readonly icon = 'storefront';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     return this.http.get<CatalogItem[]>(`${BASE_URL}/getTurnovers`).pipe(map((items) => paginateClientSide(items, query)));

@@ -14,6 +14,7 @@ export class PaymentMethodCatalogService implements CatalogAdapter {
   readonly key = 'payment-methods';
   readonly label = 'Método de pago';
   readonly labelPlural = 'Métodos de pago';
+  readonly icon = 'credit_card';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     let params = new HttpParams();

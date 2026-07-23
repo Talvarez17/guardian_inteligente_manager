@@ -14,6 +14,7 @@ export class PaymentFormCatalogService implements CatalogAdapter {
   readonly key = 'payment-forms';
   readonly label = 'Forma de pago';
   readonly labelPlural = 'Formas de pago';
+  readonly icon = 'payments';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     let params = new HttpParams();

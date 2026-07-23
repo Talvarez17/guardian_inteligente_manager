@@ -15,6 +15,7 @@ import { RoleCatalogService } from '../../services/role-catalog.service';
 import { DocumentalAreaService } from '../../services/documental-area.service';
 import { DocumentTypeService } from '../../services/document-type.service';
 import { PaginatedResponse } from '../../../../core/models/pagination-model';
+import { catalogTint } from '../../../../shared/utils/catalog-tint';
 
 // Compact summary fetches the whole catalog (no server-side pagination) to compute accurate
 // total/active/inactive counts, matching app-catalog-crud's compact mode.
@@ -46,6 +47,9 @@ export class Management {
   readonly documentTypesSummary = this.createSummary(() =>
     this.documentTypeService.findAll({ limit: SUMMARY_FETCH_LIMIT }),
   );
+
+  readonly documentalAreasTint = catalogTint('documental-areas');
+  readonly documentTypesTint = catalogTint('document-types');
 
   openCreateArea(): void {
     this.areaModal().open();
@@ -88,6 +92,7 @@ export class Management {
       total,
       active,
       inactive: computed(() => total() - active()),
+      percent: computed(() => (total() === 0 ? 0 : Math.round((active() / total()) * 100))),
       reload: () => resource.reload(),
     };
   }

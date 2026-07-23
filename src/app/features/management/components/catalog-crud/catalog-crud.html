@@ -1,5 +1,50 @@
 <div class="card shadow-sm bg-base-100" [class.card-sm]="mode() === 'compact'">
   <div class="card-body gap-3">
+    @if (mode() === 'compact') {
+
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex min-w-0 items-start gap-2.5">
+        <div class="flex size-9 shrink-0 items-center justify-center rounded-xl" [class]="iconTint()">
+          <i class="material-symbols-rounded text-[18px]!">{{ adapter().icon }}</i>
+        </div>
+        <div class="min-w-0">
+          <h2 class="truncate font-bold text-base-content">{{ adapter().labelPlural }}</h2>
+          @if (!loading() && !loadError()) {
+          <p class="text-xs text-base-content/50">{{ activeCount() }} de {{ items().length }} activos</p>
+          }
+        </div>
+      </div>
+
+      @if (loading()) {
+      <span class="loading loading-spinner loading-sm shrink-0"></span>
+      } @else if (!loadError()) {
+      <div class="radial-progress shrink-0 text-[10px]! font-bold text-success" style="--size:2.75rem; --thickness:3px;"
+        [style.--value]="activePercent()" role="progressbar" [attr.aria-valuenow]="activePercent()">
+        {{ activePercent() }}%
+      </div>
+      }
+    </div>
+
+    @if (loadError()) {
+    <p class="text-error text-sm text-center py-4">{{ loadError() }}</p>
+    }
+
+    <div class="flex items-center gap-2 border-t border-base-200 pt-3">
+      <button type="button" title="Nuevo" (click)="openCreate()"
+        class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-content shadow-sm transition-colors hover:bg-primary/90">
+        <i class="material-symbols-rounded text-[16px]!">add</i>
+      </button>
+      @if (viewAllRoute()) {
+      <a [routerLink]="viewAllRoute()"
+        class="flex flex-1 items-center justify-between px-1 text-sm font-semibold text-base-content/70 hover:text-base-content">
+        Ver lista
+        <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
+      </a>
+      }
+    </div>
+
+    } @else {
+
     <div class="flex items-center justify-between gap-2">
       <h2 class="font-bold text-base-content">{{ adapter().labelPlural }}</h2>
       <button type="button" class="btn btn-primary btn-sm" (click)="openCreate()">
@@ -7,38 +52,6 @@
         Nuevo
       </button>
     </div>
-
-    @if (mode() === 'compact') {
-
-    @if (loading()) {
-    <div class="flex justify-center py-6"><span class="loading loading-spinner loading-sm"></span></div>
-    } @else if (loadError()) {
-    <p class="text-error text-sm text-center py-6">{{ loadError() }}</p>
-    } @else {
-    <div class="stats stats-vertical sm:stats-horizontal bg-base-200/50 w-full">
-      <div class="stat place-items-center py-3">
-        <div class="stat-title text-xs">Total</div>
-        <div class="stat-value text-2xl">{{ items().length }}</div>
-      </div>
-      <div class="stat place-items-center py-3">
-        <div class="stat-title text-xs">Activos</div>
-        <div class="stat-value text-2xl text-success">{{ activeCount() }}</div>
-      </div>
-      <div class="stat place-items-center py-3">
-        <div class="stat-title text-xs">Inactivos</div>
-        <div class="stat-value text-2xl text-error">{{ inactiveCount() }}</div>
-      </div>
-    </div>
-    }
-
-    @if (viewAllRoute()) {
-    <a [routerLink]="viewAllRoute()" class="btn btn-outline btn-sm w-full">
-      Ver lista
-      <i class="material-symbols-rounded text-[16px]!">arrow_forward</i>
-    </a>
-    }
-
-    } @else {
 
     <label class="input input-sm w-full">
       <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

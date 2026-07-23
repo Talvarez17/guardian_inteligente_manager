@@ -14,6 +14,7 @@ export class RoleCatalogService implements CatalogAdapter {
   readonly key = 'roles';
   readonly label = 'Rol de sistema';
   readonly labelPlural = 'Roles de sistema';
+  readonly icon = 'shield_person';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     let params = new HttpParams();

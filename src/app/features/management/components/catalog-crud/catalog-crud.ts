@@ -6,6 +6,7 @@ import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { CatalogAdapter, CatalogItem, ItemFormModel } from '../../models/catalog-crud-model';
 import { requiredTextSchema } from '../../../../shared/forms/field-schemas';
 import { resolveErrorMessage } from '../../../../shared/utils/resolve-error-message';
+import { catalogTint } from '../../../../shared/utils/catalog-tint';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const SUMMARY_FETCH_LIMIT = 100;
@@ -59,6 +60,11 @@ export class CatalogCrud {
 
   readonly activeCount = computed(() => this.items().filter((item) => item.status).length);
   readonly inactiveCount = computed(() => this.items().length - this.activeCount());
+  readonly activePercent = computed(() => {
+    const total = this.items().length;
+    return total === 0 ? 0 : Math.round((this.activeCount() / total) * 100);
+  });
+  readonly iconTint = computed(() => catalogTint(this.adapter().key));
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialogRef');
 

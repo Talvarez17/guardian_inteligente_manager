@@ -14,6 +14,7 @@ export class ChecklistItemTypeCatalogService implements CatalogAdapter {
   readonly key = 'checklist-item-types';
   readonly label = 'Tipo de ítem de checklist';
   readonly labelPlural = 'Tipos de ítem de checklist';
+  readonly icon = 'checklist';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     let params = new HttpParams();

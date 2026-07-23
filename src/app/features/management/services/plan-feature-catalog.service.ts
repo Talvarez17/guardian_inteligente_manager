@@ -15,6 +15,7 @@ export class PlanFeatureCatalogService implements CatalogAdapter {
   readonly key = 'plan-feature';
   readonly label = 'Característica de plan';
   readonly labelPlural = 'Características de plan';
+  readonly icon = 'star';
 
   findAll(query: PaginationQuery): Observable<PaginatedResponse<CatalogItem>> {
     return this.http.get<CatalogItem[]>(`${BASE_URL}/getFeatures`).pipe(map((items) => paginateClientSide(items, query)));
